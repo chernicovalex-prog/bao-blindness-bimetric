@@ -1,0 +1,48 @@
+{
+  "version": "v10.6",
+  "article": "v21.5",
+  "description": "Canonical numbers of the project 'BAO Blindness to Bimetric Gravity'. Each entry carries the value, the tolerance used by tests/CI, and its verification status.",
+  "baseline": {
+    "theta_deg": 6.1, "mFP_H0": 25.0, "alpha": 0.0, "beta": 3.0,
+    "Omega_Lambda": 0.699,
+    "y0": {"value": 0.999512, "tol": 1e-6},
+    "Omega_m": {"value": 0.30439, "tol": 1e-4},
+    "B0": {"value": -40.248, "tol": 1e-3},
+    "B1": {"value": 28.230, "tol": 1e-3},
+    "B2": {"value": -21.173, "tol": 1e-3},
+    "B3": {"value": 21.173, "tol": 1e-3},
+    "B4": {"value": -28.206, "tol": 1e-3},
+    "B1_sq": {"value": 796.94, "tol": 1e-2},
+    "w_DE_0": {"value": -1.005, "tol": 1e-3}
+  },
+  "bao": {
+    "dchi2_full_cov": {"value": 0.178, "tol": 0.005,
+      "status": "verified (DeepSeek independent code, rev 27)"},
+    "dchi2_table4": {"value": 0.195, "tol": 0.005,
+      "status": "superseded convention (rounded sigmas), kept for reference"}
+  },
+  "cmb_theta_scan": {
+    "lcdm": {"value": 1.41, "tol": 0.05},
+    "6.1":  {"value": 0.04,    "tol": 0.02, "h": 0.72425, "Om": 0.30312},
+    "10.0": {"value": 9.34,    "tol": 0.15},
+    "12.2": {"value": 31.62,   "tol": 0.30},
+    "15.0": {"value": 93.65,   "tol": 0.50, "h": 0.72984, "Om": 0.32129},
+    "18.3": {"value": 244.71,  "tol": 1.0},
+    "20.0": {"value": 370.33,  "tol": 1.5},
+    "25.0": {"value": 1029.42, "tol": 4.0},
+    "30.0": {"value": 2368.93, "tol": 8.0, "h": 0.75643, "Om": 0.40006},
+    "status": "verified rev 43 (blind DeepSeek code, run by project) + rev 44 (Qwen) + rev 46 (GLM): three independent codebases agree"
+  },
+  "sne": {
+    "diagonal": {"dchi2_std": 15.58, "dchi2_pure": 1.49, "Om_best": 0.3741,
+      "chi2_min": 722.48, "tol": 0.2,
+      "status": "verified rev 38 (genuine Pantheon+ data)"},
+    "full_stat_sys": {"dchi2_std": 6.50, "dchi2_pure": 0.96, "Om_best": 0.3470,
+      "chi2_min": 1433.06, "chi2_bim": 1439.56, "chi2_dof": 0.903, "tol": 0.1,
+      "status": "verified rev 38 (genuine Pantheon+ data, independent AI run matched all 12 numbers)"}
+  },
+  "combined": {
+    "all_diag": 16.22, "all_full": 6.72, "v6_diag": 12.22,
+    "note": "sigma_int must NOT be added on top of full STAT+SYS (double counting)"
+  }
+}

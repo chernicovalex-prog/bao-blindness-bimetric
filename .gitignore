@@ -1,0 +1,5 @@
+__pycache__/
+*.pyc
+data/Pantheon+SH0ES.dat
+data/Pantheon+SH0ES_STAT+SYS.cov
+sne_results_v5.txt
