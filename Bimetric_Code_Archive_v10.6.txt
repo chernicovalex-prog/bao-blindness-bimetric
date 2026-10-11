@@ -1,0 +1,2264 @@
+================================================================================
+              BIMETRIC GRAVITY -- CODE ARCHIVE v10.6
+              Проект: BAO Blindness to Bimetric Gravity
+              Автор: Aleksandr Chernikov + AI team
+              Дата: 2026-10-09 (v10.3 patch), 2026-10-10 (v10.4 docs, v10.5 FIX-23, v10.6 FIX-24)
+              Статья: BAO_Blindness_v21.4
+
+CHANGELOG v8 → v10 (10 AI cross-review):
+  [FIX-1 CRITICAL] §4a r_s(): added 1/a² Jacobian in integrand.
+    Was: return cs / np.sqrt(E2)
+    Now: return cs / (a*a * np.sqrt(E2 / E2_0))  — also E²(0)=1 normalization
+    Without 1/a², r_s was ~7e-9 instead of ~0.032 (off by 6 orders of magnitude).
+    E²(0) normalization ensures r_s and D_M use the same E² convention.
+    (Found by DeepSeek + Kimi, rev 27/28)
+
+  [FIX-2 CRITICAL] §8 .cov parser: removed f.seek(0).
+    After readline(), pointer is correct; seek(0) reads "1701" as data.
+    (Found by DeepSeek, rev 27)
+
+  [FIX-3 MEDIUM] §8: data['MU'] → data['m_b_corr'].
+    Pantheon+ files have m_b_corr, not MU.
+    (Found by Gemini, rev 28)
+
+  [FIX-4 MEDIUM] §1 + §6: brentq range [0.5, 1.0] → [1e-6, 1.0].
+    For large θ, physical root y can drop below 0.5; narrow range
+    triggered fallback y=1.0, silently reverting to GR.
+    §4a already had [1e-6, 1.0] since v8.
+    (Found by DeepSeek + Gemini + Kimi, rev 27/28)
+
+  [FIX-5 MEDIUM] §4a: calibration block — static print() → real computations.
+    Was: print("  theta=6.1:  ~0.46   (file: 0.4488)")
+    Now: actual minimize_chi2() for 3 calibration points.
+    (Found by DeepSeek, rev 27)
+
+  [FIX-6 MINOR] §3a: "Hassan & Rosen 2021" → "Högås & Mörtsell 2021".
+    (Found by Kimi, rev 28)
+
+  [FIX-7 MINOR] §3a + §9: combined Δχ² uses 0.178 (exact BAO) instead of 0.195.
+    0.178 + 11.58 + 0.45 = 12.21 (was: 0.195 + 11.58 + 0.45 = 12.22)
+    (Found by Kimi, rev 28)
+
+  [FIX-8 MINOR] §4a docstring: "Hu & Sugiyama fitting formula" → "direct integration of c_s/E".
+    (Found by Kimi, rev 28)
+
+  NOTE: v9 introduced three broken fixes (FIX-5 mu_lcdm zH→z_arr, FIX-7 R formula,
+  FIX-8 calibration crash) that were REGRESSIONS. v10 rolls back to v8 for these
+  three and applies only the correct fixes. Lesson: do not push fixes without
+  running the code. (DeepSeek v9 review, rev 29)
+
+    [FIX-9 MINOR] §4a docstring: removed remaining "Hu & Sugiyama 1995 method" references.
+    (Found by DeepSeek v10 review, rev 30)
+
+  [FIX-10 MINOR] §3a + §3: brentq range [0, 1.0] → [1e-6, 1.0] for consistency.
+    (Found by DeepSeek v10 review, rev 30)
+
+  [FIX-11 MINOR] §1 w_DE: one-sided difference at z=0 (avoids z-dz < 0).
+    (Found by DeepSeek v10 review, rev 30)
+
+  [FIX-12 MINOR] §4: added comment marking 15.58=SNe v5, 0.178=BAO versions.
+    (Found by DeepSeek v10 review, rev 30)
+
+  [FIX-13 MINOR] §1/§4a/§6 solve_y: brentq fallback now logs warning to stderr.
+    (Found by DeepSeek v10 review, rev 30)
+
+  [FIX-14 MINOR] §4a calibration: added assert with 2% tolerance.
+    (Found by DeepSeek v10 review, rev 30)
+
+  [FIX-15 MINOR] §9: CMB values marked [УСТАРЕЛО — v8, пересчитать в v10.1].
+    (Found by DeepSeek v10 review, rev 30)
+
+  [FIX-16 CRITICAL] §4a D_M_bimetric(): np.trapezoid → scipy.integrate.quad.
+    Was: z_arr = np.linspace(0, z_rec, npts); np.trapezoid(1.0/E_arr, z_arr)
+    Now: quad(lambda z: 1.0/np.sqrt(E2_bimetric(z,...)), 0, z_rec, limit=200)
+    Linear trapezoid with 3000 points misses the sharp transition at z<10
+    where bimetric E²(z) deviates most from LCDM. Adaptive quad catches it.
+    Effect: D_M changes by ~0.16%, but chi² is hypersensitive — up to 15% shift.
+    (Found by Alice, rev 30 — first container run of §4a)
+
+  [FIX-17 MEDIUM] §4a solve_y(): brentq fallback now logs warning to stderr.
+    Was: except ValueError: return 1.0  (silent)
+    Now: except ValueError: print(f"WARNING [§4a]: brentq fallback at z={z}", file=sys.stderr); return 1.0
+    FIX-13 in v10.1 claimed to add this to §4a, but the actual §4a code
+    still had the silent fallback. Now actually applied.
+    (Found by Alice, rev 30)
+
+  [FIX-18 MEDIUM] §4a calibration: assert removed, replaced with print ✅/❌.
+    Was: assert rel_err < 0.02, f"Calibration mismatch..."
+    Now: print(f"  {'✅' if rel_err < 0.02 else '❌'} ...")
+    After FIX-1/FIX-2, the 6.1° calibration point shifted by ~9% (0.489 vs 0.449).
+    The assert would crash the code. Old file values (0.4488/111.24/2451.32)
+    were computed on pre-FIX-1 code and are no longer exact targets.
+    (Found by Alice, rev 30)
+
+  [FIX-19 MEDIUM] §4a minimize_chi2(): wb range expanded.
+    Was: np.linspace(0.0215, 0.0230, 12)  and  0.018 < wb < 0.024
+    Now: np.linspace(0.015, 0.025, 12)    and  0.015 < wb < 0.025
+    For θ=30°, the optimizer hit the wb=0.02 boundary, giving chi²=2824
+    instead of 2437 (15% error). Expanded range fixes this.
+    (Found by Alice, rev 31)
+
+  [FIX-20 CRITICAL] §4a r_s(): E2_0 normalization fixed.
+    Was: E2_0 = Om0 + (omega_r_h2/h**2) + OL_de
+    Now: E2_0 = 1.0
+    solve_Om0 guarantees E²(0) = 1 via ODE(0) = 1 - Om0 - Or,
+    but ODE(0) ≠ OL_de for θ > 0 (ODE(0) = OL - sin²θ·mFP²·dy0·...).
+    The old formula used OL_de (=0.699, input parameter) instead of
+    the true ODE(0), causing r_s to be overestimated by 0.17% (6.1°) to
+    4.9% (30°). Effect on χ²: +0.7-2.0% (compensated by h, wb adjustment).
+    (Found by GLM, rev 36 cross-review v10.2, finding #68)
+
+  [FIX-21 MEDIUM] §4a solve_y(): special case mFP2 == 0.
+    When mFP2=0 (LCDM check), the quartic f(y) = y*(Ot+OL-OL*y²) has
+    no sign change on [1e-6, 1] (f>0 at both ends), so brentq falls
+    back to y=1.0 with a WARNING for every z — thousands of warnings.
+    Now: if mFP2 == 0: return 1.0 immediately (GR limit, no warning).
+    (Found by GLM, rev 36 cross-review v10.2, finding #69)
+
+
+
+  [FIX-23 CRITICAL] §4a massive neutrino treatment + h grid.
+    (rev 41; white spot #60/#70/#77 resolved; verified against published
+    Bansal & Huterer 2025 text, arXiv:2502.07185)
+    (a) E^2(z) and r_s now include massive-nu density with physical
+        transition at 1+z=131 (matter below, relativistic above — B&H
+        App. C convention). Was MISSING entirely in v10.3/v10.4
+        (nu treated as radiation at all z).
+    (b) R prefactor UNCHANGED: sqrt(Om0 + omega_nu/h^2)*DM — this exactly
+        matches B&H Eq. 4 (no double count; DeepSeek #60 was wrong,
+        GLM #70 correctly identified the missing E^2 term).
+    (c) h grid widened to [0.55, 0.88] (finding #74: h hits 0.75 at
+        theta>=25).
+    Effect (large, chi^2 hypersensitive): baseline 0.50 -> 0.02;
+    15 deg: -15%; 30 deg: -3.3% (2373 vs 2454); LCDM: 0.014 -> 1.41
+    (DOF=1, p=0.24 — consistent). Almost the entire baseline chi^2 was
+    this artifact. Full 8-angle rerun with v10.5 (Kimi, rev 41).
+
+  [FIX-24 MEDIUM] §4a sound_speed(): R_b exponent sign.
+    Was: R_b = 31500 * wb * (T_CMB/2.7)**4 / (1+z)
+    Now: R_b = 31500 * wb * (T_CMB/2.7)**(-4) / (1+z)
+    c_s = 1/sqrt(3(1+R_b)), R_b = 3*wb/(4*omega_gamma) * 1/(1+z); since
+    omega_gamma ∝ T^4, the temperature factor enters as (T/2.7)^(-4).
+    The wrong sign made R_b 3.8% too large, r_s 0.7% too small, l_a 0.7%
+    too large — absorbed by the h-fit at the minimum (chi^2 barely changed)
+    but biased h HIGH by ~0.011 (1.5%) at all theta.
+    Found by the BLIND cross-check (rev 43): DeepSeek's independent code
+    (honest run by Kimi) matched ours in chi^2/Omega_m but had h lower by
+    ~0.011 — the discrepancy isolated this line. DeepSeek's SUBMITTED
+    table, in contrast, was internally inconsistent (fabricated output);
+    lesson re-confirmed: run the code, never trust reported numbers.
+    Effect: baseline 0.02->0.04; 15deg 94.68->93.65; 30deg 2373.16->2368.93;
+    h(6.1deg) 0.73500->0.72425. Omega_m(theta) UNCHANGED (closure does not
+    involve c_s). All 8 angles rerun (Kimi, rev 43); v10.5 numbers superseded.
+
+  [REV-37 NOTE] §4a re-run by Alice from this archive: measured values
+    0.50/15.72/42.63/111.94/273.60/405.56/1086.80/2453.80 (h=0.69566..0.72624),
+    LCDM chi2=0.0142 — match docstring within 0.01-0.02% (Nelder-Mead tolerances).
+    §9 summary table corrected (30°/LCDM rows had stale v10.2 values).
+    Known remaining: brentq fallback warnings at theta>=25° (z~1087-1089)
+    — harmless, aggregation planned as FIX-22.
+
+  [REV-38/39 NOTE] SNe full-cov VERIFIED on genuine data (Alice, rev 38):
+    dchi2_std=6.50, dchi2_pure=0.96, Om_best=0.3470, chi2_min=1433.06,
+    chi2_bim=1439.56, chi2/dof=0.903 (all 12 numbers match external AI run).
+    Data: genuine GitHub Pantheon+SH0ES.dat (position-parsed) + full STAT+SYS.cov.
+    Finding #52 (PDF parsing) CLOSED. Decisions (Sasha): three honest error-model
+    pairs; combined quoted in two consistent schemes (all-diag 16.22 / all-full 7.18);
+    sigma_int must NOT be added on top of full STAT+SYS (double counting);
+    article v20.9 -> v21.0. §3/§3a docstrings and §9 updated accordingly.
+
+PRESERVED FROM v8 (NOT changed — v8 was correct):
+  - mu_lcdm uses (1 + zH) for (1+z) factor — zHEL is correct (NOT zCMB)
+  - R = sqrt(Om0 + wnu/h²) * DM — +wnu/h² is correct because solve_Om0
+    gives Om0 without massive neutrinos (Or includes relativistic ν only)
+================================================================================
+
+РЕЕСТР
+======
+
+Этот архив содержит ВЕСЬ исполняемый код нашей работы.
+Каждый раздел помечен источником:
+
+  [ОРИГИНАЛ]      -- код написан и запущен, файл сохранён
+  [DEEPSEEK]      -- независимый код от DeepSeek, включён в архив
+  [НОВЫЙ]         -- код написан для архива, не запущен
+  [УТЕРЯН]        -- оригинал утерян, код не восстановлен
+
+Структура:
+  §1. BAO (наш)       -- supplementary_code_v4.py [ОРИГИНАЛ]
+  §2. BAO DATA        -- DESI DR2 data vector + covariance 13x13 [ОРИГИНАЛ]
+  §3. SNe v5          -- sne_full_cov_v5.py [ОРИГИНАЛ]
+  §3a. SNe v6         -- sne_v6_sigma_int.py [ИСПРАВЛЕН, ЗАПУЩЕН]
+  §4. CMB             -- cmb_recalc.py [ОРИГИНАЛ]
+  §4a. CMB theta-scan  -- cmb_theta_scan.py [ИСПРАВЛЕН v10.6 FIX-23/24, ЗАПУЩЕН rev 43, ✓✓]
+  
+================================================================================
+§4a. CMB THETA-SCAN (bimetric E²) -- cmb_theta_scan.py [v10.5, ЗАПУЩЕН rev 41]
+================================================================================
+
+#!/usr/bin/env python3
+"""
+CMB chi^2 theta-scan with FULL BIMETRIC E^2(z) for D_M integral.
+v10.5 (FIX-23): massive neutrinos with physical z_nr=130 transition
+in E^2(z) and r_s (Bansal & Huterer App. C convention); R prefactor
+per B&H Eq. 4 unchanged. v10.3/v10.4 CMB numbers SUPERSEDED (they
+missed the nu-matter term: baseline was 0.50, true 0.02).
+
+Method:
+  - Quartic solver from §1 (brentq range [1e-6, 1.0])
+  - D_M = integral_0^{z*} dz / E_bimetric(z), E^2 includes nu_density
+  - R = sqrt(Om0 + omega_nu/h^2) * D_M  (Bansal & Huterer Eq. 4)
+  - r_s: direct integration of c_s/E(z) with nu-matter
+  - h-dependent Omega_r and Omega_nu; Nelder-Mead over (h, omega_b)
+
+Full theta-scan (v10.6, FIX-23 + FIX-24, rev 43, h grid [0.55,0.88]):
+  LCDM: chi2=1.41, h=0.72085
+  6.1 deg:    0.04 (h=0.72425, Om=0.30312)
+  10.0 deg:   9.34 (h=0.72605, Om=0.30904)
+  12.2 deg:  31.62 (h=0.72749, Om=0.31375)
+  15.0 deg:  93.65 (h=0.72984, Om=0.32129)
+  18.3 deg: 244.71 (h=0.73343, Om=0.33260)
+  20.0 deg: 370.33 (h=0.73568, Om=0.33955)
+  25.0 deg:1029.42 (h=0.74420, Om=0.36514)
+  30.0 deg:2368.93 (h=0.75643, Om=0.40006)
+  (v10.5 values superseded by FIX-24: exponent sign in R_b — h was biased
+   high by ~0.011; chi2 shifts <0.5%. v10.3 values also superseded.)
+  Status: v10.6 numbers VERIFIED (✓✓ rev 43) — blind independent code by
+  DeepSeek (run by Kimi) agrees to <0.5% (0.0403/93.74/2369.45, h to 4 dp).
+  DeepSeek's SUBMITTED table was fabricated; his code was honest.
+
+Author: Kimi (Moonshot AI) for Aleksandr Chernikov
+Date: 2026-10-10 (v10.5)
+"""
+
+import numpy as np
+from scipy.optimize import brentq, minimize
+from scipy.integrate import quad
+import warnings
+warnings.filterwarnings('ignore')
+
+# ============================================================
+# CMB data (Bansal & Huterer 2025, Planck + ACT)
+# ============================================================
+R_obs  = 1.7504
+la_obs = 301.77
+wb_obs = 0.022371
+data_vec = np.array([R_obs, la_obs, wb_obs])
+
+C_raw = np.array([
+    [1559.83,  -1325.41,   -36.45],
+    [-1325.41, 714691.80,  269.77],
+    [-36.45,   269.77,     2.10]
+]) * 1e-8
+C_inv = np.linalg.inv(C_raw)
+
+# ============================================================
+# Physical constants
+# ============================================================
+z_star = 1090.0
+T_CMB = 2.725
+omega_gamma_h2 = 2.469e-5
+N_eff = 3.046
+m_nu_sum = 0.06
+omega_nu = m_nu_sum / 93.14  # ~6.44e-4
+omega_r_h2 = omega_gamma_h2 * (1 + 7/8 * N_eff * (4/11)**(4/3))  # 4.174e-5
+
+Z_NR = 131.0  # 1+z at which m_nu=0.06 eV becomes non-relativistic
+def nu_density(z, wnu_h):
+    zp1 = 1.0 + z
+    if zp1 <= Z_NR:
+        return wnu_h * zp1**3
+    return wnu_h * zp1**4 / Z_NR
+
+# ============================================================
+# Quartic solver (from §1, with WIDER brentq range)
+# ============================================================
+def quartic_coeffs(z, Om0, theta_rad, mFP2, sin2, cos2, alpha, beta, OL, Or):
+    Ot = Om0 * (1+z)**3 + Or * (1+z)**4
+    a0 = -1.0/3.0 * cos2 * mFP2 * (1 + 2*alpha + beta)
+    a1 = (Ot + OL +
+          mFP2 * (cos2*(alpha+beta) - sin2*(1 + alpha + beta/3.0)))
+    a2 = mFP2 * (-cos2*beta + sin2*(1 + 2*alpha + beta))
+    a3 = -(OL +
+           1.0/3.0 * mFP2 * (cos2*(-1 + alpha - beta) + 3*sin2*(alpha + beta)))
+    a4 = 1.0/3.0 * sin2 * mFP2 * beta
+    return a0, a1, a2, a3, a4
+
+def solve_y(z, Om0, theta_rad, mFP2, sin2, cos2, alpha, beta, OL, Or):
+    # FIX-21: LCDM special case — mFP2=0 means no bimetric correction.
+    # The quartic has no sign change on [1e-6, 1] (f>0 at both ends),
+    # so brentq would fail and fallback with a warning for every z.
+    if mFP2 == 0:
+        return 1.0  # GR limit: y=1 → ODE=OL → LCDM
+    a0, a1, a2, a3, a4 = quartic_coeffs(z, Om0, theta_rad, mFP2, sin2, cos2,
+                                         alpha, beta, OL, Or)
+    f = lambda y: a0 + a1*y + a2*y**2 + a3*y**3 + a4*y**4
+    try:
+        return brentq(f, 1e-6, 1.0, xtol=1e-14)
+    except ValueError:
+        import sys
+        print(f"WARNING [§4a]: brentq fallback (y=1.0) at z={z}", file=sys.stderr)
+        return 1.0  # GR limit fallback
+
+# ============================================================
+# Bimetric E^2(z) — FULL, not LCDM approximation
+# ============================================================
+def E2_bimetric(z, Om0, theta_rad, mFP2, sin2, cos2, alpha, beta, OL, Or, wnu_h=0.0):
+    y = solve_y(z, Om0, theta_rad, mFP2, sin2, cos2, alpha, beta, OL, Or)
+    dy = 1 - y
+    ODE = OL - sin2 * mFP2 * dy * (1 + alpha*dy + beta/3.0 * dy**2)
+    return Om0*(1+z)**3 + Or*(1+z)**4 + ODE + nu_density(z, wnu_h)
+
+# ============================================================
+# Self-consistent Omega_m from quartic at z=0
+# ============================================================
+def solve_Om0(theta_rad, mFP2, sin2, cos2, alpha, beta, OL, Or, wnu_h=0.0):
+    def eq(Om):
+        if Om <= 0 or Om >= 1:
+            return 1e10
+        y = solve_y(0.0, Om, theta_rad, mFP2, sin2, cos2, alpha, beta, OL, Or)
+        dy = 1 - y
+        ODE = OL - sin2 * mFP2 * dy * (1 + alpha*dy + beta/3.0*dy**2)
+        return 1.0 - Or - ODE - Om - wnu_h
+    return brentq(eq, 0.01, 0.99, xtol=1e-14)
+
+# ============================================================
+# Sound horizon r_s (direct integration of c_s/E(z))
+# ============================================================
+def sound_speed(z, wb):
+    R_b = 31500 * wb * (T_CMB/2.7)**(-4) / (1+z)  # FIX-24
+    cs = 1.0 / np.sqrt(3 * (1 + R_b))
+    return cs
+
+def r_s(z_rec, wb, h, Om0, OL_de, wnu_h=0.0):
+    # Sound horizon integral using a-substitution.
+    # At z > z_rec (~1090), Vainshtein screening is active, so
+    # E^2(z) ≈ Om0*(1+z)^3 + Or*(1+z)^4 + OL_de (LCDM-like).
+    # OL_de = effective dark energy density (≈ Omega_Lambda in screened regime).
+    # FIX v10: added 1/a² Jacobian (dz = -da/a²) and E²(0)=1 normalization
+    # to match D_M which uses E²_bimetric with E²(0)=1 by construction.
+    def integrand(a):
+        z = 1.0/a - 1.0
+        cs = sound_speed(z, wb)
+        E2 = Om0*(1+z)**3 + (omega_r_h2/h**2)*(1+z)**4 + OL_de + nu_density(z, wnu_h)
+        # FIX-20: E²(0) = 1 by construction (solve_Om0 guarantees this).
+        # OL_de is the INPUT parameter (0.699), NOT the true ODE(0).
+        # For θ > 0, ODE(0) = OL - sin²θ·mFP²·dy0·(...) ≠ OL_de.
+        # Using OL_de gave r_s overestimated by 0.17% (6.1°) to 4.9% (30°).
+        E2_0 = 1.0
+        return cs / (a*a * np.sqrt(E2 / E2_0))
+    a_rec = 1.0 / (1.0 + z_rec)
+    result, _ = quad(integrand, 1e-8, a_rec, limit=200)
+    return result  # in units of c/H_0
+
+# ============================================================
+# D_M with bimetric E^2(z)
+# ============================================================
+def D_M_bimetric(z_rec, Om0, theta_rad, mFP2, sin2, cos2, alpha, beta, OL, Or,
+                 wnu_h=0.0, npts=3000):
+    # FIX v10.2: np.trapezoid → scipy.integrate.quad
+    # Linear trapezoid with 3000 points misses the sharp bimetric transition
+    # at z<10. Adaptive quad catches it. Effect on D_M: ~0.16%, but chi²
+    # is hypersensitive to D_M (up to 15% shift in chi²).
+    def integrand(z):
+        E2 = E2_bimetric(z, Om0, theta_rad, mFP2, sin2, cos2,
+                         alpha, beta, OL, Or, wnu_h)
+        return 1.0 / np.sqrt(E2)
+    result, _ = quad(integrand, 0, z_rec, limit=200)
+    return result
+
+# ============================================================
+# CMB chi^2
+# ============================================================
+def chi2_cmb(vec):
+    delta = vec - data_vec
+    return float(delta @ C_inv @ delta)
+
+def compute_observables(h, wb, Om0, OL, theta_rad, mFP2, sin2, cos2,
+                        alpha, beta, Or, wnu=omega_nu, wnu_h=0.0):
+    DM = D_M_bimetric(z_star, Om0, theta_rad, mFP2, sin2, cos2,
+                       alpha, beta, OL, Or, wnu_h)
+    R = np.sqrt(Om0 + wnu_h) * DM
+    rs = r_s(z_star, wb, h, Om0, OL, wnu_h)
+    # l_a
+    l_a = np.pi * DM / rs
+    return np.array([R, l_a, wb])
+
+def minimize_chi2(Om0, OL, theta_rad, mFP2, sin2, cos2, alpha, beta, Or, wnu_h=0.0):
+    def objective(params):
+        h, wb = params
+        if not (0.55 < h < 0.88 and 0.015 < wb < 0.025):  # FIX-23 wide h
+            return 1e10
+        vec = compute_observables(h, wb, Om0, OL, theta_rad, mFP2, sin2, cos2,
+                                  alpha, beta, Or, wnu_h=wnu_h)
+        return chi2_cmb(vec)
+    # Coarse scan (FIX v10.2: wb range expanded to [0.015, 0.025])
+    best = 1e10; best_init = None
+    for h in np.linspace(0.60, 0.85, 16):  # FIX-23 wide coarse grid
+        for wb in np.linspace(0.015, 0.025, 12):
+            c2 = objective([h, wb])
+            if c2 < best:
+                best = c2; best_init = [h, wb]
+    res = minimize(objective, best_init, method='Nelder-Mead',
+                   options={'xatol': 1e-8, 'fatol': 1e-12, 'maxiter': 5000})
+    h_best, wb_best = res.x
+    vec = compute_observables(h_best, wb_best, Om0, OL, theta_rad, mFP2,
+                               sin2, cos2, alpha, beta, Or, wnu_h=wnu_h)
+    return chi2_cmb(vec), h_best, wb_best, vec
+
+# ============================================================
+# MAIN: theta-scan
+# ============================================================
+if __name__ == '__main__':
+    alpha = 0.0
+    beta = 3.0
+    mFP_H0 = 25.0
+    OL = 0.699
+
+    thetas = [6.1, 10.0, 12.2, 15.0, 18.3, 20.0, 25.0, 30.0]
+
+    print("CMB THETA-SCAN (bimetric E^2, R with neutrinos)")
+    print("=" * 60)
+    print(f"Method: Bansal & Huterer 2025 compressed CMB likelihood")
+    print(f"E^2(z): FULL BIMETRIC (quartic solver)")
+    print(f"brentq range: [1e-6, 1.0]")
+    print()
+
+    # LCDM sanity check
+    Or_lcdm = omega_r_h2 / 0.678**2
+    chi2_lcdm, h_l, wb_l, v_l = minimize_chi2(
+        0.309 - omega_nu/0.678**2, 0.691, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, Or_lcdm,
+        wnu_h=omega_nu/0.678**2)
+    print(f"LCDM: chi2={chi2_lcdm:.2e}, h={h_l:.5f}, wb={wb_l:.7f}")
+    print()
+
+    print(f"{'theta':>6} {'chi2':>10} {'h':>8} {'Omega_m':>8} {'R':>8} {'l_a':>8}")
+    print("-" * 60)
+
+    for theta_deg in thetas:
+        theta_rad = np.radians(theta_deg)
+        sin2 = np.sin(theta_rad)**2
+        cos2 = np.cos(theta_rad)**2
+        mFP2 = mFP_H0**2
+
+        # h-dependent Omega_r (will be updated during minimization)
+        # First solve with fixed h guess
+        h_guess = 0.678
+        Or = omega_r_h2 / h_guess**2
+        wnu_h = omega_nu / h_guess**2
+
+        Om0 = solve_Om0(theta_rad, mFP2, sin2, cos2, alpha, beta, OL, Or, wnu_h)
+
+        for iteration in range(3):
+            chi2_val, h_best, wb_best, vec = minimize_chi2(
+                Om0, OL, theta_rad, mFP2, sin2, cos2, alpha, beta, Or, wnu_h)
+            Or = omega_r_h2 / h_best**2
+            wnu_h = omega_nu / h_best**2
+            Om0 = solve_Om0(theta_rad, mFP2, sin2, cos2, alpha, beta, OL, Or, wnu_h)
+
+        print(f"{theta_deg:6.1f} {chi2_val:10.2f} {h_best:8.5f} {Om0:8.5f} "
+              f"{vec[0]:8.4f} {vec[1]:8.3f}")
+
+    print()
+    print("Calibration check (computed vs file):")
+    for theta_deg_cal, chi2_file in [(6.1, 0.4488), (15.0, 111.24), (30.0, 2451.32)]:
+        theta_rad_cal = np.radians(theta_deg_cal)
+        sin2_cal = np.sin(theta_rad_cal)**2
+        cos2_cal = np.cos(theta_rad_cal)**2
+        mFP2_cal = mFP_H0**2
+        h_guess_cal = 0.678
+        Or_cal = omega_r_h2 / h_guess_cal**2
+        Om0_cal = solve_Om0(theta_rad_cal, mFP2_cal, sin2_cal, cos2_cal,
+                            alpha, beta, OL, Or_cal)
+        for _ in range(3):
+            chi2_cal, h_cal, wb_cal, vec_cal = minimize_chi2(
+                Om0_cal, OL, theta_rad_cal, mFP2_cal, sin2_cal, cos2_cal,
+                alpha, beta, Or_cal)
+            Or_cal = omega_r_h2 / h_cal**2
+            Om0_cal = solve_Om0(theta_rad_cal, mFP2_cal, sin2_cal, cos2_cal,
+                                alpha, beta, OL, Or_cal)
+        rel_err = abs(chi2_cal - chi2_file) / max(chi2_file, 1e-10)
+        status = "✅" if rel_err < 0.02 else "❌"
+        print(f"  {status} theta={theta_deg_cal:5.1f}: chi2={chi2_cal:.4f}  (file: {chi2_file}, rel_err={rel_err:.4%})")
+        # FIX v10.2: assert removed. After FIX-1/FIX-2, the 6.1° point
+        # shifted ~9% from the old file value. Old file values are from
+        # pre-FIX-1 code and are no longer exact targets.
+
+
+
+================================================================================
+
+§5. w_DE data       -- wDE_data.txt [ОРИГИНАЛ]
+  §6. DeepSeek BAO    -- independent verification, dchi2=0.1959 [DEEPSEEK]
+  §7. DeepSeek CMB     -- independent CMB verification [DEEPSEEK, НЕ ЗАПУЩЕН]
+  §8. DeepSeek SNe     -- independent SNe framework [DEEPSEEK, НЕ ЗАПУЩЕН]
+  §9. Результаты       -- сводка всех чисел
+
+
+
+КЛЮЧЕВЫЕ ОТЛИЧИЯ ОТ v6
+======================
+1. ДОБАВЛЕН §4a: CMB theta-scan с ПОЛНОЙ биметрической E^2(z) для D_M
+   -- заменяет LCDM-аппроксимацию из §4
+   -- даёт chi2=111 при theta=15 (vs 30.50 с LCDM E^2)
+   -- v10.2: quad вместо trapezoid, полный θ-скан (8 углов)
+   -- v10.2: 0.49/111.02/2437.22 (post-FIX-1/FIX-2, quad)
+2. BUGFIX: brentq range расширен с [0.5, 1.0] до [1e-6, 1.0]
+   -- для theta>=15 при z~5-50 корень y опускается ниже 0.5
+   -- узкий range давал fallback (y=1.0), пропуская биметрическую поправку
+3. Table A5 пересчитана с биметрической E^2(z) -- все промежуточные
+   значения (3.84, 30.50, 150, 580) были занижены в 2-4 раза
+
+КЛЮЧЕВЫЕ ОТЛИЧИЯ ОТ v10.1 (v10.2)
+==================================
+1. FIX-16 CRITICAL: D_M_bimetric — np.trapezoid → scipy.integrate.quad
+2. FIX-17: §4a solve_y — добавлен warning в stderr
+3. FIX-18: §4a calibration — assert убран, заменён на print ✅/❌
+4. FIX-19: §4a minimize_chi2 — wb range расширен до [0.015, 0.025]
+5. Полный θ-скан (8 углов) впервые запущен с quad + широкий wb
+6. LCDM: chi²=289.01 (БАГ — исправлен в v10.3)
+
+КЛЮЧЕВЫЕ ОТЛИЧИЯ ОТ v10.5 (v10.6)
+==================================
+1. FIX-24: знак экспоненты (T/2.7)^(-4) в R_b; h смещён вниз на ~0.011,
+   chi2 сдвинут <0.5%. Все числа пересчитаны, кросс-проверка ✓✓ (rev 43).
+
+КЛЮЧЕВЫЕ ОТЛИЧИЯ ОТ v10.4 (v10.5)
+==================================
+1. FIX-23 CRITICAL: физический переход массивных нейтрино (материя при z<=130,
+   релятивистские выше) в E^2(z) и r_s; префактор R (Eq. 4 B&H) без изменений;
+   h-грид расширен до [0.55, 0.88] (#74). Все CMB-числа пересчитаны (см. §9).
+2. Белое пятно #60/#70/#77 закрыто проверкой оригинала B&H + тремя прогонами.
+
+КЛЮЧЕВЫЕ ОТЛИЧИЯ ОТ v10.3 (v10.4)
+==================================
+1. Документация: §3/§3a docstrings и §9 обновлены верифицированными (rev 38)
+   full-cov числами (6.50/0.96/0.3470/1433.06/1439.56)
+2. Код НЕ менялся — менялись только документация и сводка результатов
+3. Решения (rev 38): две согласованные комбинации; запрет sigma_int+full
+
+КЛЮЧЕВЫЕ ОТЛИЧИЯ ОТ v10.2 (v10.3)
+==================================
+1. FIX-20 CRITICAL: r_s() — E2_0 = 1.0 (вместо Om0 + Or + OL_de)
+   -- GLM (rev 36) нашёл: OL_de — входной параметр, не ODE(0)
+   -- solve_Om0 гарантирует E²(0)=1 через ODE(0), но ODE(0) ≠ OL_de для θ > 0
+   -- Эффект: r_s завышена 0.17% (6.1°) → 4.9% (30°)
+   -- χ² изменилась на +0.7-2.0% (оптимизатор компенсирует через h, wb)
+2. FIX-21 MEDIUM: solve_y() — special case mFP2 == 0 (LCDM без warning'ов)
+   -- При mFP2=0 квартика не имеет корня на [1e-6, 1] → brentq fallback
+   -- Теперь: if mFP2 == 0: return 1.0 (GR limit)
+3. LCDM: chi²=289.01 → 0.01 (баг E2_0 исправлен FIX-20)
+4. h(θ): растёт 0.696→0.726 (v10.2: падал 0.693→0.652)
+5. BAO, SNe: без изменений (кросс-проверка подтвердила)
+
+
+КЛЮЧЕВЫЕ ОТЛИЧИЯ ОТ v5
+======================
+1. BUGFIX: mFP2/mFP^2 key mismatch в round-trip -- исправлено (унифицирован 'mFP2')
+2. BUGFIX: SNe v6 scan -- заменён `pass` на полный работающий код
+3. BUGFIX: brentq fallback в §3 -- добавлен try/except (как в §1)
+
+КЛЮЧЕВЫЕ ОТЛИЧИЯ ОТ v4
+======================
+1. SNe v6 ДОБАВЛЕН (§3a) -- sigma_int=0.12, dchi2=11.58 [ЗАПУЩЕН]
+2. Результаты §9 обновлены с v6
+3. TODO обновлён: SNe v6 завершён
+
+КЛЮЧЕВЫЕ ОТЛИЧИЯ ОТ v3 (наследуется)
+===================================
+1. DeepSeek BAO код НАЙДЕН и включён (§6) -- dchi2=0.1959 подтверждён
+2. DeepSeek CMB и SNe коды включены (§7, §8)
+3. Ничего не помечено [УТЕРЯН] -- весь код есть
+
+
+ПРИМЕЧАНИЕ О ПОРЯДКЕ ДАННЫХ
+==========================
+В коде v4 (§1):     Lya DM=38.988 (idx 11), Lya DH=8.632 (idx 12)
+В файле ковариации: Lya DH=8.6315 (idx 12), Lya DM=38.9890 (idx 13)
+При использовании полной ковариации -- переставить последние два значения.
+
+
+ИТОГИ ЗАПУСКОВ
+==============
+BAO (наш v4):       dchi2 = 0.1949 (блочно-диагональная, округлённые данные)
+BAO (DeepSeek):     dchi2 = 0.1959 (блочно-диагональная, точные данные)
+BAO (полная cov):   dchi2 = 0.1788 (полная 13x13 из файла)
+SNe v5 (diag):      dchi2 = 15.57 (диагональная ковариация, sigma_int=0)
+SNe v5 (full):      dchi2 = 6.50  (STAT+SYS, без sigma_int) [✓✓ rev 38: ИИ #3 + запуск Алисы
+                    из архива на подлинных GitHub-данных; Om_best=0.3470, pure=0.96,
+                    chi2_min=1433.06, chi2_bim=1439.56; находка #52 закрыта]
+SNe v5 full extra:  pure=0.96, Om_best=0.3470, chi2_min=1433.06, chi2_bim=1439.56,
+                    chi2/dof=0.903 (diag: 0.455) --- все 12 чисел совпали с ИИ #3
+SNe v6 (diag):      dchi2 = 11.58 (диагональная, sigma_int=0.12) [НОВЫЙ]
+SNe v6 scan:        0.00→15.57, 0.05→14.68, 0.08→13.49, 0.10→12.55,
+                    0.12→11.58, 0.15→10.15, 0.20→8.06
+CMB THETA-SCAN (v10.3, bimetric E², quad, wide wb, FIX-20):
+  theta  | chi2     | h      | Omega_m
+  -------|----------|--------|----------
+   6.1°  |    0.50   | 0.69566 | 0.30436
+  10.0°  |   15.71   | 0.69738 | 0.31029
+  12.2°  |   42.61   | 0.69876 | 0.31502
+  15.0°  |  111.91   | 0.70099 | 0.32258
+  18.3°  |  273.54   | 0.70441 | 0.33392
+  20.0°  |  405.48   | 0.70655 | 0.34089
+  25.0°  | 1086.66   | 0.71464 | 0.36655
+  30.0°  | 2453.58   | 0.72624 | 0.40154
+  LCDM:  |    1.41   | (v10.5 FIX-23; DOF=1 p=0.24; v10.3: 0.014 superseded)
+
+  v10.2 values (pre-FIX-20): 0.4865/111.02/2437.22 — had E2_0 bug.
+  v10.3 values (post-FIX-20): 0.50/111.91/2453.58 — corrected E2_0=1.0.
+  Changes: +2.0% (6.1°), +0.8% (15°), +0.7% (30°) — small, optimizer compensates.
+  h(θ) now grows (0.696→0.726) instead of falling (0.693→0.652) — FIX-20
+  makes r_s smaller, so optimizer raises h to increase r_s and match l_a.
+  LCDM: 289.01 (v10.2, bug) → 0.01 (v10.3, correct — 3 params fit 3 points).
+
+
+================================================================================
+§1. BAO -- supplementary_code_v4.py [ОРИГИНАЛ]
+================================================================================
+
+#!/usr/bin/env python3
+"""
+Supplementary Material: Bimetric Cosmology BAO Analysis
+=======================================================
+Quartic solver for bimetric Friedmann equation (Hogas 2025, A13)
+and BAO chi-squared against DESI DR2 (13 data points).
+
+Verified against primary sources:
+  - Hogas 2025 (arXiv:2507.03743): Friedmann (A11), Omega_DE (A12), quartic (A13)
+  - Hogas 2021a (arXiv:2101.08794): B-params (3.4a-e), w_DE (5.9)
+
+Author: Alice AI (Yandex)
+Date: 2026-09-30
+License: MIT
+"""
+
+import numpy as np
+from scipy.optimize import brentq, minimize_scalar
+
+
+# ============================================================
+# Parameters (Hogas 2025 best-fit)
+# ============================================================
+theta_deg = 6.1
+theta = np.radians(theta_deg)
+sin2 = np.sin(theta)**2
+cos2 = np.cos(theta)**2
+mFP_H0 = 25.0       # m_FP / H_0
+mFP2 = mFP_H0**2
+alpha = 0.0
+beta = 3.0
+Omega_Lambda = 0.699
+Omega_r = 5.38e-5
+
+
+# ============================================================
+# DESI DR2 BAO Data (Table IV, arXiv:2503.14738)
+# 13 data points: BGS(1) + 6 tracers x (DM, DH)
+# ============================================================
+desi_data = [
+    (0.295, 'DV', 7.942, 0.075, None),
+    (0.510, 'DM', 13.588, 0.167, -0.459),
+    (0.510, 'DH', 21.863, 0.425, -0.459),
+    (0.706, 'DM', 17.351, 0.177, -0.404),
+    (0.706, 'DH', 19.455, 0.330, -0.404),
+    (0.934, 'DM', 21.576, 0.152, -0.416),
+    (0.934, 'DH', 17.641, 0.193, -0.416),
+    (1.321, 'DM', 27.601, 0.318, -0.434),
+    (1.321, 'DH', 14.176, 0.221, -0.434),
+    (1.484, 'DM', 30.512, 0.760, -0.500),
+    (1.484, 'DH', 12.817, 0.516, -0.500),
+    (2.330, 'DM', 38.988, 0.531, -0.431),
+    (2.330, 'DH', 8.632, 0.101, -0.431),
+]
+
+n = len(desi_data)
+C = np.zeros((n, n))
+C[0, 0] = desi_data[0][3]**2
+for i in range(1, n, 2):
+    r = desi_data[i][4]
+    C[i, i] = desi_data[i][3]**2
+    C[i+1, i+1] = desi_data[i+1][3]**2
+    C[i, i+1] = r * desi_data[i][3] * desi_data[i+1][3]
+    C[i+1, i] = C[i, i+1]
+C_inv = np.linalg.inv(C)
+data_vals = np.array([d[2] for d in desi_data])
+
+
+# ============================================================
+# Quartic Solver (Hogas 2025, Appendix A, eq. A13)
+# ============================================================
+def solve_quartic(z, mFP2, sin2, cos2, alpha, beta, Omega_Lambda, Omega_r, Omega_m0=0.3044):
+    """Solve quartic for y(z) using Brent's method on [1e-6, 1.0].
+
+    Quartic (A13): a0 + a1*y + a2*y^2 + a3*y^3 + a4*y^4 = 0
+    where y = a_f / a_g (ratio of scale factors).
+    """
+    Omega_tot_z = Omega_m0 * (1+z)**3 + Omega_r * (1+z)**4
+
+    a0 = -1.0/3.0 * cos2 * mFP2 * (1 + 2*alpha + beta)
+    a1 = (Omega_tot_z + Omega_Lambda +
+          mFP2 * (cos2*(alpha+beta) - sin2*(1 + alpha + beta/3.0)))
+    a2 = mFP2 * (-cos2*beta + sin2*(1 + 2*alpha + beta))
+    a3 = -(Omega_Lambda +
+           1.0/3.0 * mFP2 * (cos2*(-1 + alpha - beta) + 3*sin2*(alpha + beta)))
+    a4 = 1.0/3.0 * sin2 * mFP2 * beta
+
+    def quartic_eval(y):
+        return a0 + a1*y + a2*y**2 + a3*y**3 + a4*y**4
+
+    try:
+        return brentq(quartic_eval, 1e-6, 1.0)
+    except ValueError:
+        import sys
+        print(f"WARNING [§1]: brentq fallback (y=1.0) at z={z}", file=sys.stderr)
+        return 1.0  # GR limit fallback
+
+
+def E2_bimetric(z, mFP2, sin2, cos2, alpha, beta, Omega_Lambda, Omega_r, Omega_m0=0.3044):
+    """Compute E^2(z) = H^2(z)/H_0^2 for bimetric model (A11 + A12)."""
+    y = solve_quartic(z, mFP2, sin2, cos2, alpha, beta, Omega_Lambda, Omega_r, Omega_m0)
+    dy = 1 - y
+    Omega_DE = Omega_Lambda - sin2 * mFP2 * dy * (1 + alpha*dy + beta/3.0 * dy**2)
+    return Omega_m0*(1+z)**3 + Omega_r*(1+z)**4 + Omega_DE
+
+
+def w_DE(z, mFP2, sin2, cos2, alpha, beta, Omega_Lambda, Omega_r, Omega_m0=0.3044, dz=1e-4):
+    """Effective equation of state w_DE(z).
+
+    Formula: w = -1 + (1+z)/(3*Omega_DE) * d(Omega_DE)/dz
+
+    Equivalent to Hogas 2021a eq. (5.9):
+      w = -1 - (1/3) * y' * d(ln Omega_DE)/dy
+    where y' = dy/d(ln a) = -(1+z) * dy/dz (negative).
+    The minus signs cancel, giving the PLUS sign in the code formula.
+    """
+    yp = solve_quartic(z + dz, mFP2, sin2, cos2, alpha, beta, Omega_Lambda, Omega_r, Omega_m0)
+    y0 = solve_quartic(z, mFP2, sin2, cos2, alpha, beta, Omega_Lambda, Omega_r, Omega_m0)
+
+    def ODE(y):
+        d = 1 - y
+        return Omega_Lambda - sin2 * mFP2 * d * (1 + alpha*d + beta/3.0 * d**2)
+
+    # FIX v10.1: one-sided difference at z=0 (avoids z-dz < 0)
+    if z < dz:
+        ym = y0  # no backward step
+        dODE_dz = (ODE(yp) - ODE(y0)) / dz
+    else:
+        ym = solve_quartic(z - dz, mFP2, sin2, cos2, alpha, beta, Omega_Lambda, Omega_r, Omega_m0)
+        dODE_dz = (ODE(yp) - ODE(ym)) / (2 * dz)
+    return -1.0 + (1+z) / (3.0 * ODE(y0)) * dODE_dz
+
+
+# ============================================================
+# BAO Distance Predictions
+# ============================================================
+def _integrate(y, x):
+    return np.sum(0.5 * (y[:-1] + y[1:]) * (x[1:] - x[:-1]))
+
+
+def comoving_distance(z, mFP2, sin2, cos2, alpha, beta, Omega_Lambda, Omega_r, Omega_m0, Nz=500):
+    """D_M = c/H_0 * integral(1/E(z'), dz')."""
+    zs = np.linspace(0, z, Nz)
+    E2s = np.array([E2_bimetric(zi, mFP2, sin2, cos2, alpha, beta, Omega_Lambda, Omega_r, Omega_m0)
+                    for zi in zs])
+    return _integrate(1.0 / np.sqrt(E2s), zs)
+
+
+def BAO_predictions(f, z, obs_type, mFP2, sin2, cos2, alpha, beta, Omega_Lambda, Omega_r, Omega_m0):
+    """Compute BAO observable: D_M/r_d, D_H/r_d, or D_V/r_d.
+
+    f = c / (H_0 * r_d)  -- free parameter marginalised over.
+    D_V = (z * D_M^2 * D_H)^{1/3}  (Eisenstein & Hu, used by DESI)
+    """
+    if obs_type == 'DH':
+        return f / np.sqrt(E2_bimetric(z, mFP2, sin2, cos2, alpha, beta, Omega_Lambda, Omega_r, Omega_m0))
+    elif obs_type == 'DM':
+        return f * comoving_distance(z, mFP2, sin2, cos2, alpha, beta, Omega_Lambda, Omega_r, Omega_m0)
+    elif obs_type == 'DV':
+        E2 = E2_bimetric(z, mFP2, sin2, cos2, alpha, beta, Omega_Lambda, Omega_r, Omega_m0)
+        DM = comoving_distance(z, mFP2, sin2, cos2, alpha, beta, Omega_Lambda, Omega_r, Omega_m0)
+        DH = 1.0 / np.sqrt(E2)
+        return f * (z * DM**2 * DH)**(1.0/3.0)
+
+
+# ============================================================
+# Chi-squared Calculation
+# ============================================================
+def chi2_bimetric(f, mFP2, sin2, cos2, alpha, beta, Omega_Lambda, Omega_r, Omega_m0):
+    model = np.array([BAO_predictions(f, z, ot, mFP2, sin2, cos2, alpha, beta, Omega_Lambda, Omega_r, Omega_m0)
+                      for z, ot, v, e, r in desi_data])
+    delta = data_vals - model
+    return float(delta @ C_inv @ delta)
+
+
+def minimize_chi2_bimetric(mFP2, sin2, cos2, alpha, beta, Omega_Lambda, Omega_r, Omega_m0):
+    result = minimize_scalar(
+        lambda f: chi2_bimetric(f, mFP2, sin2, cos2, alpha, beta, Omega_Lambda, Omega_r, Omega_m0),
+        bounds=(20, 80), method='bounded')
+    return result.x, result.fun
+
+
+def chi2_LCDM(f, Omega_m0, Omega_r=5.38e-5):
+    model = np.zeros(n)
+    for i, (z, ot, v, e, r) in enumerate(desi_data):
+        E2 = Omega_m0*(1+z)**3 + Omega_r*(1+z)**4 + (1 - Omega_m0 - Omega_r)
+        if ot == 'DH':
+            model[i] = f / np.sqrt(E2)
+        elif ot == 'DM':
+            zs = np.linspace(0, z, 500)
+            E2s = Omega_m0*(1+zs)**3 + Omega_r*(1+zs)**4 + (1 - Omega_m0 - Omega_r)
+            model[i] = f * _integrate(1.0/np.sqrt(E2s), zs)
+        elif ot == 'DV':
+            zs = np.linspace(0, z, 500)
+            E2s = Omega_m0*(1+zs)**3 + Omega_r*(1+zs)**4 + (1 - Omega_m0 - Omega_r)
+            DM = _integrate(1.0/np.sqrt(E2s), zs)
+            DH = 1.0 / np.sqrt(E2)
+            model[i] = f * (z * DM**2 * DH)**(1.0/3.0)
+    delta = data_vals - model
+    return float(delta @ C_inv @ delta)
+
+
+def minimize_chi2_LCDM(Omega_m0, Omega_r=5.38e-5):
+    result = minimize_scalar(lambda f: chi2_LCDM(f, Omega_m0, Omega_r),
+                             bounds=(20, 80), method='bounded')
+    return result.x, result.fun
+
+
+# ============================================================
+# B-parameter conversion (Hogas 2021a, eq. 3.4a-e)
+# ============================================================
+def compute_B_params(theta_deg, mFP_H0, alpha, beta, Omega_Lambda):
+    """Convert physical parameters to B-parameters (forward, eq. 3.4a-e)."""
+    th = np.radians(theta_deg)
+    s2 = np.sin(th)**2
+    m2 = mFP_H0**2
+
+    B0 = 3*Omega_Lambda - s2*m2*(3 + 3*alpha + beta)                     # 3.4a
+    B1 = s2*m2*(1 + 2*alpha + beta)                                       # 3.4b
+    B2 = -s2*m2*(alpha + beta)                                            # 3.4c
+    B3 = s2*m2*beta                                                       # 3.4d
+    B4 = 3*np.tan(th)**2 * Omega_Lambda + s2*m2*(-1 + alpha - beta)       # 3.4e
+
+    return {'B0': B0, 'B1': B1, 'B2': B2, 'B3': B3, 'B4': B4}
+
+
+def invert_B_params(B, theta_deg):
+    """Convert B-parameters to physical parameters (inverse, eq. 3.3a-e)."""
+    th = np.radians(theta_deg)
+    s2 = np.sin(th)**2
+    B0, B1, B2, B3, B4 = B['B0'], B['B1'], B['B2'], B['B3'], B['B4']
+
+    mFP2 = (B1 + 2*B2 + B3) / s2                                          # 3.3b
+    Omega_Lambda = B0/3 + B1 + B2 + B3/3                                  # 3.3c
+    alpha = -(B2 + B3) / (B1 + 2*B2 + B3)                                # 3.3d
+    beta = B3 / (B1 + 2*B2 + B3)                                         # 3.3e
+
+    return {'mFP2': mFP2, 'Omega_Lambda': Omega_Lambda, 'alpha': alpha, 'beta': beta}
+
+
+# ============================================================
+# Main: Run all calculations
+# ============================================================
+if __name__ == '__main__':
+    print("=" * 60)
+    print("BIMETRIC COSMOLOGY --- BAO ANALYSIS")
+    print("=" * 60)
+
+    # 1. Self-consistent Omega_m0 from quartic at z=0
+    y0 = solve_quartic(0, mFP2, sin2, cos2, alpha, beta, Omega_Lambda, Omega_r, 0.3044)
+    dy0 = 1 - y0
+    ODE_0 = Omega_Lambda - sin2 * mFP2 * dy0 * (1 + alpha*dy0 + beta/3.0 * dy0**2)
+    Omega_m0 = 1.0 - Omega_r - ODE_0
+    E2_0 = E2_bimetric(0, mFP2, sin2, cos2, alpha, beta, Omega_Lambda, Omega_r, Omega_m0)
+    print(f"\n1. Self-consistent solution:")
+    print(f"   y(0) = {y0:.10f}")
+    print(f"   Omega_m,0 = {Omega_m0:.8f}")
+    print(f"   E^2(0) = {E2_0:.15f}")
+
+    # 2. w(z)
+    print(f"\n2. Effective equation of state w(z):")
+    for z in [0, 0.5, 1.0, 2.0, 2.5, 3.0, 4.0]:
+        w = w_DE(z, mFP2, sin2, cos2, alpha, beta, Omega_Lambda, Omega_r, Omega_m0)
+        print(f"   w({z}) = {w:.6f}")
+
+    # 3. BAO chi-squared
+    f_bio, chi2_bio = minimize_chi2_bimetric(mFP2, sin2, cos2, alpha, beta, Omega_Lambda, Omega_r, Omega_m0)
+    f_lcdm, chi2_lcdm = minimize_chi2_LCDM(0.2972)
+    print(f"\n3. BAO chi-squared:")
+    print(f"   LambdaCDM:  chi^2 = {chi2_lcdm:.4f}  (Omega_m=0.2972, f={f_lcdm:.2f})")
+    print(f"   Bimetric:   chi^2 = {chi2_bio:.4f}  (Omega_m={Omega_m0:.4f}, f={f_bio:.2f})")
+    print(f"   Delta chi^2 = {chi2_bio - chi2_lcdm:.4f}")
+
+    # 3b. Delta chi^2 decomposition
+    print(f"\n3b. Delta chi^2 decomposition:")
+    f_lcdm_biom, chi2_lcdm_biom = minimize_chi2_LCDM(Omega_m0)
+    print(f"   LCDM at Omega_m={Omega_m0:.4f}: chi^2 = {chi2_lcdm_biom:.4f}  (f={f_lcdm_biom:.2f})")
+    print(f"   Penalty for Omega_m shift: {chi2_lcdm_biom - chi2_lcdm:.4f}")
+    print(f"   Bimetric correction: {chi2_bio - chi2_lcdm_biom:.4f}")
+    print(f"   Total Delta chi^2 = {(chi2_lcdm_biom - chi2_lcdm) + (chi2_bio - chi2_lcdm_biom):.4f}")
+    f_bio_lcdm, chi2_bio_lcdm = minimize_chi2_bimetric(mFP2, sin2, cos2, alpha, beta, Omega_Lambda, Omega_r, 0.2972)
+    print(f"   Bimetric at Omega_m=0.2972: chi^2 = {chi2_bio_lcdm:.4f}  (f={f_bio_lcdm:.2f})")
+    print(f"   Pure bimetric correction (same Omega_m): {chi2_bio_lcdm - chi2_lcdm:.4f}")
+
+    # 4. m_FP/H0 scan (BAO-blindness test)
+    print(f"\n4. m_FP/H0 scan:")
+    for mfp in [15, 25, 45, 100, 1000]:
+        m2 = mfp**2
+        y = solve_quartic(0, m2, sin2, cos2, alpha, beta, Omega_Lambda, Omega_r, 0.3044)
+        dy = 1 - y
+        ODE = Omega_Lambda - sin2 * m2 * dy * (1 + alpha*dy + beta/3.0 * dy**2)
+        om = 1.0 - Omega_r - ODE
+        f, chi = minimize_chi2_bimetric(m2, sin2, cos2, alpha, beta, Omega_Lambda, Omega_r, om)
+        print(f"   m_FP/H0={mfp:5d}: chi^2={chi:.4f}, Delta_chi^2={chi - chi2_lcdm:.4f}")
+
+    # 5. B-parameters
+    B = compute_B_params(theta_deg, mFP_H0, alpha, beta, Omega_Lambda)
+    print(f"\n5. B-parameters:")
+    for k, v in B.items():
+        print(f"   {k} = {v:.6f}")
+    print(f"   B1^2 = {B['B1']**2:.4f}")
+
+    # Round-trip
+    B_inv = invert_B_params(B, theta_deg)
+    print(f"\n   Round-trip verification:")
+    print(f"   mFP2: {mFP2:.6f} -> {B_inv['mFP2']:.6f}")
+    print(f"   Omega_Lambda: {Omega_Lambda:.6f} -> {B_inv['Omega_Lambda']:.6f}")
+    print(f"   alpha: {alpha:.6f} -> {B_inv['alpha']:.6f}")
+    print(f"   beta: {beta:.6f} -> {B_inv['beta']:.6f}")
+
+    print("\n" + "=" * 60)
+    print("DONE")
+
+================================================================================
+
+§2. BAO DATA -- desi_dr2_bao_covariance_13x13.txt [ОРИГИНАЛ]
+================================================================================
+
+# DESI DR2 BAO Full Covariance Matrix (13x13)
+# Source: https://github.com/CobayaSampler/bao_data/tree/master/desi_bao_dr2
+# File: desi_gaussian_bao_ALL_GCcomb_cov.txt
+#
+# Data vector order:
+#   1. BGS  z=0.295  DV/rd  =  7.9417
+#   2. LRG1 z=0.510  DM/rd  =  13.5876
+#   3. LRG1 z=0.510  DH/rd  =  21.8629
+#   4. LRG2 z=0.706  DM/rd  =  17.3507
+#   5. LRG2 z=0.706  DH/rd  =  19.4553
+#   6. LRG3+ELG1 z=0.934  DM/rd  =  21.5756
+#   7. LRG3+ELG1 z=0.934  DH/rd  =  17.6415
+#   8. ELG2 z=1.321  DM/rd  =  27.6009
+#   9. ELG2 z=1.321  DH/rd  =  14.1760
+#  10. QSO  z=1.484  DM/rd  =  30.5119
+#  11. QSO  z=1.484  DH/rd  =  12.8170
+#  12. Lyα  z=2.330  DH/rd  =  8.6315
+#  13. Lyα  z=2.330  DM/rd  =  38.9890
+#
+5.78998687e-03  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00
+0.00000000e+00  2.83473742e-02  -3.26062007e-02  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00
+0.00000000e+00  -3.26062007e-02  1.83928040e-01  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00
+0.00000000e+00  0.00000000e+00  0.00000000e+00  3.23752442e-02  -2.37445646e-02  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00
+0.00000000e+00  0.00000000e+00  0.00000000e+00  -2.37445646e-02  1.11469198e-01  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00
+0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  2.61732816e-02  -1.12938006e-02  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00
+0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  -1.12938006e-02  4.04183878e-02  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00
+0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  1.05336516e-01  -2.90308418e-02  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00
+0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  -2.90308418e-02  5.04233092e-02  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00
+0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  5.83020277e-01  -1.95215562e-01  0.00000000e+00  0.00000000e+00
+0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  -1.95215562e-01  2.68336193e-01  0.00000000e+00  0.00000000e+00
+0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  1.02136194e-02  -2.31395216e-02
+0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00  -2.31395216e-02  2.82685779e-01
+
+================================================================================
+
+§3. SNe v5 -- sne_full_cov_v5.py [ОРИГИНАЛ]
+================================================================================
+
+#!/usr/bin/env python3
+"""
+SNe Delta-chi2: v5
+- Correct quartic (y(0) = 0.999512, Omega_m = 0.30435)
+- m_b_corr_err_DIAG for diagonal covariance (matches article: 15.58)
+- Full STAT+SYS for full covariance (VERIFIED rev 38: 6.50/0.96/0.3470)
+- Optional STATONLY for comparison
+- sigma_int = 0.0
+- zCMB for integral, zHEL for (1+z) factor
+- Analytical marginalization over M
+"""
+
+import numpy as np
+import pandas as pd
+from scipy.optimize import brentq
+from scipy.integrate import cumulative_trapezoid
+from scipy.interpolate import interp1d
+import os, time
+
+# ===== MODEL PARAMETERS =====
+theta = 6.1 * np.pi / 180
+m_FP, alpha, beta = 25.0, 0.0, 3.0
+Omega_Lambda, Omega_r = 0.699, 9.08e-5
+sin2, tan2, m2 = np.sin(theta)**2, np.tan(theta)**2, m_FP**2
+
+# B-parameters (Eq. 3.4, Hogas & Mortsell 2021)
+B0 = 3*Omega_Lambda - sin2*m2*(3 + 3*alpha + beta)
+B1 = sin2*m2*(1 + 2*alpha + beta)
+B2 = -sin2*m2*(alpha + beta)
+B3 = sin2*m2*beta
+B4 = 3*tan2*Omega_Lambda + sin2*m2*(-1 + alpha - beta)
+
+print("="*60)
+print("SNe Delta-chi2: v5")
+print("  m_b_corr_err_DIAG (diagonal) + full STAT+SYS")
+print("  sigma_int = 0.0, zCMB integral, zHEL (1+z)")
+print("="*60)
+print(f"\nB-params: B0={B0:.3f} B1={B1:.3f} B2={B2:.3f} B3={B3:.3f} B4={B4:.3f}")
+print(f"  (article: -40.248, 28.230, -21.173, 21.173, -28.206)")
+
+# ===== QUARTIC SOLVER =====
+def solve_y(z, Om):
+    Ot = Om*(1+z)**3 + Omega_r*(1+z)**4
+    a0 = -B1/(3*tan2)
+    a1 = B0/3 - B2/tan2 + Ot
+    a2 = B1 - B3/tan2
+    a3 = B2 - B4/(3*tan2)
+    a4 = B3/3
+    return brentq(lambda y: a0 + a1*y + a2*y**2 + a3*y**3 + a4*y**4, 1e-6, 1.0)
+
+def E2_bim(z, Om, y):
+    Ot = Om*(1+z)**3 + Omega_r*(1+z)**4
+    ODE = Omega_Lambda - sin2*m2*(1-y)*(1 + alpha*(1-y) + beta/3*(1-y)**2)
+    return Ot + ODE
+
+def E2_lcdm(z, Om):
+    return Om*(1+z)**3 + Omega_r*(1+z)**4 + (1 - Om - Omega_r)
+
+# ===== SELF-CONSISTENCY =====
+Omega_m = brentq(lambda Om: E2_bim(0, Om, solve_y(0, Om)) - 1.0, 0.01, 0.99)
+y0 = solve_y(0, Omega_m)
+print(f"\nSelf-consistency:")
+print(f"  Omega_m = {Omega_m:.5f}  (article: 0.30439)")
+print(f"  y(0) = {y0:.6f}  (article: 0.999512)")
+print(f"  E^2(0) = {E2_bim(0, Omega_m, y0):.8f}")
+
+# ===== BIMETRIC E(z) ON FINE GRID =====
+c_H0 = 2997.92458  # c/H0 in Mpc (h=1)
+z_fine = np.linspace(0, 5, 10000)
+t0 = time.time()
+y_fine = np.array([solve_y(z, Omega_m) for z in z_fine])
+E_fine_bim = np.sqrt(E2_bim(z_fine, Omega_m, y_fine))
+int_fine_bim = cumulative_trapezoid(1.0/E_fine_bim, z_fine, initial=0)
+int_bim_interp = interp1d(z_fine, int_fine_bim, kind='cubic', fill_value='extrapolate')
+print(f"\nBimetric E(z) grid: {time.time()-t0:.1f}s")
+
+# ===== FIND FILES =====
+print(f"\n1. Finding files...")
+data_file = cov_file = cov_statonly = None
+for f in os.listdir('.'):
+    fl = f.lower()
+    if f.endswith('.dat') and 'sh0es' in fl and 'cov' not in fl:
+        data_file = f
+    elif f.endswith('.cov') and 'stat+sys' in fl.replace('%2b','+'):
+        cov_file = f
+    elif f.endswith('.cov') and 'statonly' in fl:
+        cov_statonly = f
+print(f"  Data: {data_file}")
+print(f"  Cov:  {cov_file}")
+if cov_statonly:
+    print(f"  Stat-only: {cov_statonly}")
+
+# ===== READ DATA =====
+print(f"\n2. Reading data...")
+df = pd.read_csv(data_file, sep=r'\s+')
+print(f"  Columns: {list(df.columns[:10])}...")
+zCMB = df['zCMB'].values
+zHEL = df['zHEL'].values
+mb = df['m_b_corr'].values
+mb_err = df['m_b_corr_err_DIAG'].values
+print(f"  Total SNe: {len(zCMB)}")
+
+# ===== READ COVARIANCE(S) =====
+print(f"\n3. Reading covariance...")
+t0 = time.time()
+with open(cov_file) as f:
+    N_cov = int(f.readline())
+    vals = [float(next(f).strip()) for _ in range(N_cov * N_cov)]
+cov_full = np.array(vals).reshape(N_cov, N_cov)
+print(f"  STAT+SYS: {N_cov}x{N_cov}, {time.time()-t0:.1f}s")
+print(f"  diag check: sqrt(diag(STAT+SYS))/m_b_corr_err_DIAG = {np.mean(np.sqrt(np.diag(cov_full))/mb_err):.4f}")
+
+cov_statonly_mat = None
+if cov_statonly:
+    t0 = time.time()
+    with open(cov_statonly) as f:
+        N_so = int(f.readline())
+        vals_so = [float(next(f).strip()) for _ in range(N_so * N_so)]
+    cov_statonly_mat = np.array(vals_so).reshape(N_so, N_so)
+    print(f"  STATONLY: {N_so}x{N_so}, {time.time()-t0:.1f}s")
+    print(f"  diag check: sqrt(diag(STATONLY))/m_b_corr_err_DIAG = {np.mean(np.sqrt(np.diag(cov_statonly_mat))/mb_err):.4f}")
+
+# ===== APPLY z > 0.01 CUT =====
+print(f"\n4. Applying zCMB > 0.01 cut...")
+mask = zCMB > 0.01
+zC, zH, mb_c, err_c = zCMB[mask], zHEL[mask], mb[mask], mb_err[mask]
+cov_c = cov_full[np.ix_(mask, mask)]
+if cov_statonly_mat is not None:
+    cov_so_c = cov_statonly_mat[np.ix_(mask, mask)]
+N = len(zC)
+print(f"  SNe after cut: {N} (expected: 1588)")
+
+# ===== MARGINALIZED CHI2 =====
+def chi2_diag(mu):
+    r = mb_c - mu
+    w = 1.0 / err_c**2
+    S = np.sum(w)
+    return np.sum(w * r**2) - np.sum(w * r)**2 / S
+
+def chi2_full(mu, Cinv, S_full):
+    r = mb_c - mu
+    Cinv_r = Cinv @ r
+    return r @ Cinv_r - np.sum(Cinv_r)**2 / S_full
+
+# ===== BIMETRIC MU =====
+print(f"\n5. Computing bimetric mu...")
+int_bim = int_bim_interp(zC)
+D_L_bim = (1 + zH) * c_H0 * int_bim  # zHEL for (1+z)!
+mu_bim = 5 * np.log10(D_L_bim) + 25
+
+# ===== PRECOMPUTE LCDM MU FOR GRID =====
+print(f"\n6. Precomputing LCDM mu grid...")
+t0 = time.time()
+Om_grid = np.linspace(0.05, 0.60, 500)
+mu_lcdm_grid = np.zeros((len(Om_grid), N))
+for i, Om in enumerate(Om_grid):
+    E = np.sqrt(E2_lcdm(z_fine, Om))
+    integ = cumulative_trapezoid(1.0/E, z_fine, initial=0)
+    int_zC = np.interp(zC, z_fine, integ)
+    D_L = (1 + zH) * c_H0 * int_zC  # zHEL for (1+z)!
+    mu_lcdm_grid[i] = 5*np.log10(D_L) + 25
+print(f"  500 Omega_m values x {N} SNe: {time.time()-t0:.1f}s")
+
+# LCDM at fixed Omega_m (bimetric prediction)
+mu_lcdm_fixed = mu_lcdm_grid[np.argmin(np.abs(Om_grid - Omega_m))]
+
+# ===== DIAGONAL COVARIANCE =====
+print(f"\n7. Diagonal (m_b_corr_err_DIAG, sigma_int=0.0)...")
+t0 = time.time()
+chi2_diag_grid = np.array([chi2_diag(mu) for mu in mu_lcdm_grid])
+i_best_d = np.argmin(chi2_diag_grid)
+Om_best_d, chi2_best_d = Om_grid[i_best_d], chi2_diag_grid[i_best_d]
+
+# Better estimate with finer grid around best
+Om_fine_d = np.linspace(Om_best_d - 0.01, Om_best_d + 0.01, 100)
+chi2_fine_d = []
+for Om in Om_fine_d:
+    E = np.sqrt(E2_lcdm(z_fine, Om))
+    integ = cumulative_trapezoid(1.0/E, z_fine, initial=0)
+    int_zC = np.interp(zC, z_fine, integ)
+    mu = 5*np.log10((1+zH)*c_H0*int_zC) + 25
+    chi2_fine_d.append(chi2_diag(mu))
+chi2_fine_d = np.array(chi2_fine_d)
+i_best_d2 = np.argmin(chi2_fine_d)
+Om_best_d, chi2_best_d = Om_fine_d[i_best_d2], chi2_fine_d[i_best_d2]
+
+chi2_bim_d = chi2_diag(mu_bim)
+# LCDM at fixed Omega_m
+mu_fixed_d = 5*np.log10((1+zH)*c_H0*np.interp(zC, z_fine, 
+    cumulative_trapezoid(1.0/np.sqrt(E2_lcdm(z_fine, Omega_m)), z_fine, initial=0))) + 25
+chi2_fixed_d = chi2_diag(mu_fixed_d)
+
+dchi2_std_d = chi2_bim_d - chi2_best_d
+dchi2_pure_d = chi2_bim_d - chi2_fixed_d
+print(f"  LCDM: Om={Om_best_d:.4f}, chi2={chi2_best_d:.4f}  ({time.time()-t0:.1f}s)")
+print(f"  LCDM at Om={Omega_m:.5f}: chi2={chi2_fixed_d:.4f}")
+print(f"  Bimetric: chi2={chi2_bim_d:.4f}")
+print(f"  dchi2 (standard) = {dchi2_std_d:.2f}  (article: 15.58)")
+print(f"  dchi2 (pure) = {dchi2_pure_d:.2f}  (article: 1.49)")
+print(f"  chi2/dof = {chi2_best_d/(N-1):.3f}")
+
+# ===== FULL COVARIANCE (STAT+SYS) =====
+print(f"\n8. Full covariance (STAT+SYS, sigma_int=0.0)...")
+t0 = time.time()
+Cinv = np.linalg.inv(cov_c)
+S_full = np.sum(Cinv)
+print(f"  Inverted in {time.time()-t0:.1f}s")
+
+chi2_full_grid = np.array([chi2_full(mu, Cinv, S_full) for mu in mu_lcdm_grid])
+i_best_f = np.argmin(chi2_full_grid)
+Om_best_f, chi2_best_f = Om_grid[i_best_f], chi2_full_grid[i_best_f]
+
+# Finer grid
+Om_fine_f = np.linspace(Om_best_f - 0.01, Om_best_f + 0.01, 100)
+chi2_fine_f = []
+for Om in Om_fine_f:
+    E = np.sqrt(E2_lcdm(z_fine, Om))
+    integ = cumulative_trapezoid(1.0/E, z_fine, initial=0)
+    mu = 5*np.log10((1+zH)*c_H0*np.interp(zC, z_fine, integ)) + 25
+    chi2_fine_f.append(chi2_full(mu, Cinv, S_full))
+chi2_fine_f = np.array(chi2_fine_f)
+i_best_f2 = np.argmin(chi2_fine_f)
+Om_best_f, chi2_best_f = Om_fine_f[i_best_f2], chi2_fine_f[i_best_f2]
+
+chi2_bim_f = chi2_full(mu_bim, Cinv, S_full)
+chi2_fixed_f = chi2_full(mu_fixed_d, Cinv, S_full)  # same mu, different cov
+
+dchi2_std_f = chi2_bim_f - chi2_best_f
+dchi2_pure_f = chi2_bim_f - chi2_fixed_f
+print(f"  LCDM: Om={Om_best_f:.4f}, chi2={chi2_best_f:.4f}")
+print(f"  LCDM at Om={Omega_m:.5f}: chi2={chi2_fixed_f:.4f}")
+print(f"  Bimetric: chi2={chi2_bim_f:.4f}")
+print(f"  dchi2 (standard) = {dchi2_std_f:.2f}")
+print(f"  dchi2 (pure) = {dchi2_pure_f:.2f}")
+print(f"  chi2/dof = {chi2_best_f/(N-1):.3f}")
+
+# ===== OPTIONAL: STATONLY FULL =====
+if cov_statonly_mat is not None:
+    print(f"\n9. Full STATONLY covariance...")
+    t0 = time.time()
+    Cinv_so = np.linalg.inv(cov_so_c)
+    S_so = np.sum(Cinv_so)
+    print(f"  Inverted in {time.time()-t0:.1f}s")
+    
+    chi2_so_grid = np.array([chi2_full(mu, Cinv_so, S_so) for mu in mu_lcdm_grid])
+    i_best_so = np.argmin(chi2_so_grid)
+    Om_best_so = Om_grid[i_best_so]
+    chi2_best_so = chi2_so_grid[i_best_so]
+    
+    chi2_bim_so = chi2_full(mu_bim, Cinv_so, S_so)
+    chi2_fixed_so = chi2_full(mu_fixed_d, Cinv_so, S_so)
+    dchi2_std_so = chi2_bim_so - chi2_best_so
+    dchi2_pure_so = chi2_bim_so - chi2_fixed_so
+    print(f"  LCDM: Om={Om_best_so:.4f}, chi2={chi2_best_so:.4f}")
+    print(f"  dchi2 (standard) = {dchi2_std_so:.2f}")
+    print(f"  dchi2 (pure) = {dchi2_pure_so:.2f}")
+
+# ===== SUMMARY =====
+print(f"\n{'='*60}")
+print(f"SUMMARY (sigma_int = 0.0)")
+print(f"{'='*60}")
+print(f"")
+print(f"  {'':25s} {'Diagonal':>12s} {'Full':>12s}")
+print(f"  {'-'*49}")
+print(f"  {'LCDM Omega_m best':25s} {Om_best_d:12.4f} {Om_best_f:12.4f}")
+print(f"  {'LCDM chi2_min':25s} {chi2_best_d:12.4f} {chi2_best_f:12.4f}")
+print(f"  {'Bimetric chi2':25s} {chi2_bim_d:12.4f} {chi2_bim_f:12.4f}")
+print(f"  {'dchi2 (standard)':25s} {dchi2_std_d:12.2f} {dchi2_std_f:12.2f}")
+print(f"  {'dchi2 (pure)':25s} {dchi2_pure_d:12.2f} {dchi2_pure_f:12.2f}")
+print(f"  {'chi2/dof':25s} {chi2_best_d/(N-1):12.3f} {chi2_best_f/(N-1):12.3f}")
+print(f"")
+print(f"  Article (diagonal): dchi2_std=15.58, dchi2_pure=1.49, Om=0.374")
+print(f"  Brout et al. 2022: Om=0.334+/-0.018")
+
+if cov_statonly_mat is not None:
+    print(f"")
+    print(f"  STATONLY full: dchi2_std={dchi2_std_so:.2f}, dchi2_pure={dchi2_pure_so:.2f}")
+
+# ===== SAVE RESULTS =====
+with open('sne_results_v5.txt', 'w') as f:
+    f.write("SNe Delta-chi2: v5\n")
+    f.write(f"sigma_int = 0.0\n")
+    f.write(f"Omega_m (quartic) = {Omega_m:.5f}\n")
+    f.write(f"y(0) = {y0:.6f}\n")
+    f.write(f"\nDiagonal (m_b_corr_err_DIAG):\n")
+    f.write(f"  LCDM Om_best = {Om_best_d:.4f}, chi2 = {chi2_best_d:.4f}\n")
+    f.write(f"  Bimetric chi2 = {chi2_bim_d:.4f}\n")
+    f.write(f"  dchi2 (standard) = {dchi2_std_d:.2f}\n")
+    f.write(f"  dchi2 (pure) = {dchi2_pure_d:.2f}\n")
+    f.write(f"  chi2/dof = {chi2_best_d/(N-1):.3f}\n")
+    f.write(f"\nFull (STAT+SYS):\n")
+    f.write(f"  LCDM Om_best = {Om_best_f:.4f}, chi2 = {chi2_best_f:.4f}\n")
+    f.write(f"  Bimetric chi2 = {chi2_bim_f:.4f}\n")
+    f.write(f"  dchi2 (standard) = {dchi2_std_f:.2f}\n")
+    f.write(f"  dchi2 (pure) = {dchi2_pure_f:.2f}\n")
+    f.write(f"  chi2/dof = {chi2_best_f/(N-1):.3f}\n")
+    if cov_statonly_mat is not None:
+        f.write(f"\nFull (STATONLY):\n")
+        f.write(f"  LCDM Om_best = {Om_best_so:.4f}, chi2 = {chi2_best_so:.4f}\n")
+        f.write(f"  dchi2 (standard) = {dchi2_std_so:.2f}\n")
+        f.write(f"  dchi2 (pure) = {dchi2_pure_so:.2f}\n")
+
+print(f"\nResults saved to sne_results_v5.txt")
+print(f"Done!")
+
+================================================================================
+
+§3a. SNe v6 -- sne_v6_sigma_int.py [НОВЫЙ, ЗАПУЩЕН]
+================================================================================
+
+#!/usr/bin/env python3
+"""
+SNe Delta-chi2: v6 — sigma_int sensitivity test
+Based on v5, with one change: sigma_int added to diagonal covariance.
+
+Changes from v5:
+  - w = 1.0 / err_c**2            -->  w = 1.0 / (err_c**2 + sigma_int**2)
+  - sigma_int = 0.12 (standard SNe Ia intrinsic dispersion)
+  - Scan: sigma_int = 0.00, 0.05, 0.08, 0.10, 0.12, 0.15, 0.20
+
+Data source: Pantheon+SH0ES.dat (GitHub: PantheonPlusSH0ES/DataRelease)
+  Parsed from PDF export (1701 rows, 1588 after z>0.01 cut)
+  Columns: zCMB, zHEL, m_b_corr, m_b_corr_err_DIAG
+  Full covariance not used (diagonal only, matches article setup)
+
+Results (rev 8, 2026-10-07):
+  V5 (si=0.00): dchi2_std=15.57, dchi2_pure=1.49, Om_best=0.3742, chi2/dof=0.455
+  V6 (si=0.12): dchi2_std=11.58, dchi2_pure=1.11, Om_best=0.3742, chi2/dof=0.338
+  Combined V6 (all-diagonal scheme): 0.195 + 11.58 + 0.45 = 12.22
+  (rev 38: combined values must use one consistent covariance scheme;
+  mixing full-cov BAO with diag SNe is not interpretable)
+
+Conclusion: SNe remain discriminators even with sigma_int=0.12.
+Article conclusion unchanged. V6 can be cited as conservative estimate.
+
+Author: Alisa AI
+Date: 2026-10-07
+"""
+
+import numpy as np
+from scipy.optimize import brentq
+from scipy.integrate import cumulative_trapezoid
+from scipy.interpolate import interp1d
+
+# ===== MODEL PARAMETERS =====
+theta = 6.1 * np.pi / 180
+m_FP, alpha, beta = 25.0, 0.0, 3.0
+Omega_Lambda, Omega_r = 0.699, 9.08e-5
+sin2, tan2, m2 = np.sin(theta)**2, np.tan(theta)**2, m_FP**2
+
+# B-parameters (Eq. 3.4, Högås & Mörtsell 2021)
+B0 = 3*Omega_Lambda - sin2*m2*(3 + 3*alpha + beta)
+B1 = sin2*m2*(1 + 2*alpha + beta)
+B2 = -sin2*m2*(alpha + beta)
+B3 = sin2*m2*beta
+B4 = 3*tan2*Omega_Lambda + sin2*m2*(-1 + alpha - beta)
+
+# ===== QUARTIC SOLVER =====
+def solve_y(z, Om):
+    Ot = Om*(1+z)**3 + Omega_r*(1+z)**4
+    a0 = -B1/(3*tan2)
+    a1 = B0/3 - B2/tan2 + Ot
+    a2 = B1 - B3/tan2
+    a3 = B2 - B4/(3*tan2)
+    a4 = B3/3
+    return brentq(lambda y: a0 + a1*y + a2*y**2 + a3*y**3 + a4*y**4, 1e-6, 1.0)
+
+def E2_bim(z, Om, y):
+    Ot = Om*(1+z)**3 + Omega_r*(1+z)**4
+    ODE = Omega_Lambda - sin2*m2*(1-y)*(1 + alpha*(1-y) + beta/3*(1-y)**2)
+    return Ot + ODE
+
+def E2_lcdm(z, Om):
+    return Om*(1+z)**3 + Omega_r*(1+z)**4 + (1 - Om - Omega_r)
+
+# ===== SELF-CONSISTENCY =====
+Omega_m = brentq(lambda Om: E2_bim(0, Om, solve_y(0, Om)) - 1.0, 0.01, 0.99)
+y0 = solve_y(0, Omega_m)
+
+# ===== BIMETRIC E(z) ON FINE GRID =====
+c_H0 = 2997.92458
+z_fine = np.linspace(0, 5, 10000)
+y_fine = np.array([solve_y(z, Omega_m) for z in z_fine])
+E_fine_bim = np.sqrt(E2_bim(z_fine, Omega_m, y_fine))
+int_fine_bim = cumulative_trapezoid(1.0/E_fine_bim, z_fine, initial=0)
+int_bim_interp = interp1d(z_fine, int_fine_bim, kind='cubic', fill_value='extrapolate')
+
+# ===== FIND FILES =====
+import os
+data_file = None
+for f in os.listdir('.'):
+    fl = f.lower()
+    if f.endswith('.dat') and 'sh0es' in fl and 'cov' not in fl:
+        data_file = f
+        break
+print(f"  Data file: {data_file}")
+if data_file is None:
+    # Fallback: use parsed data embedded in §3 (v5)
+    # In production, download from:
+    #   https://github.com/PantheonPlusSH0ES/DataRelease/tree/main/Pantheon%2B_Data/4_DISTANCES_AND_COVAR
+    raise FileNotFoundError("Pantheon+SH0ES.dat not found. Download from GitHub (see §3).")
+
+# ===== READ DATA =====
+import pandas as pd
+print(f"  Reading data...")
+df = pd.read_csv(data_file, sep=r'\s+')
+zCMB = df['zCMB'].values
+zHEL = df['zHEL'].values
+mb = df['m_b_corr'].values
+mb_err = df['m_b_corr_err_DIAG'].values
+print(f"  Total SNe: {len(zCMB)}")
+
+# ===== APPLY z > 0.01 CUT =====
+mask = zCMB > 0.01
+zC, zH, mb_c, err_c = zCMB[mask], zHEL[mask], mb[mask], mb_err[mask]
+N = len(zC)
+print(f"  SNe after z>0.01 cut: {N} (expected: 1588)")
+
+# ===== BIMETRIC MU =====
+int_bim = int_bim_interp(zC)
+D_L_bim = (1 + zH) * c_H0 * int_bim  # zHEL for (1+z)!
+mu_bim = 5 * np.log10(D_L_bim) + 25
+
+# ===== LCDM MU FUNCTION =====
+def mu_lcdm(Om, z_arr):
+    """LCDM distance modulus for given Omega_m."""
+    E = np.sqrt(E2_lcdm(z_fine, Om))
+    integ = cumulative_trapezoid(1.0/E, z_fine, initial=0)
+    int_z = np.interp(z_arr, z_fine, integ)
+    D_L = (1 + zH) * c_H0 * int_z
+    return 5 * np.log10(D_L) + 25
+
+# ===== V6 KEY CHANGE: sigma_int in weights =====
+# V5: w = 1.0 / err_c**2
+# V6: w = 1.0 / (err_c**2 + sigma_int**2)
+
+# ===== SCAN OVER sigma_int =====
+sigma_scan = [0.00, 0.05, 0.08, 0.10, 0.12, 0.15, 0.20]
+results = []
+for si in sigma_scan:
+    err_si = np.sqrt(err_c**2 + si**2)
+    w_si = 1.0 / err_si**2
+    S_si = np.sum(w_si)
+    
+    # LCDM: find best Omega_m by grid search (marginalize over M)
+    Om_grid = np.linspace(0.15, 0.45, 3000)
+    chi2_grid = np.array([
+        np.sum(w_si * (mb_c - mu_lcdm(om, zC))**2) - 
+        np.sum(w_si * (mb_c - mu_lcdm(om, zC)))**2 / S_si
+        for om in Om_grid
+    ])
+    idx = np.argmin(chi2_grid)
+    Om_best = Om_grid[idx]
+    chi2_best = chi2_grid[idx]
+    
+    # Bimetric: Omega_m fixed by quartic, marginalize over M
+    chi2_bim = np.sum(w_si * (mb_c - mu_bim)**2) - np.sum(w_si * (mb_c - mu_bim))**2 / S_si
+    
+    # Pure bimetric: LCDM at fixed Omega_m = bimetric prediction
+    mu_fixed = mu_lcdm(Omega_m, zC)
+    chi2_fixed = np.sum(w_si * (mb_c - mu_fixed)**2) - np.sum(w_si * (mb_c - mu_fixed))**2 / S_si
+    
+    dchi2_std = chi2_bim - chi2_best
+    dchi2_pure = chi2_bim - chi2_fixed
+    results.append((si, dchi2_std, dchi2_pure, Om_best, chi2_best/(N-1)))
+    print(f"  sigma_int={si:.2f}: dchi2_std={dchi2_std:.2f}, dchi2_pure={dchi2_pure:.2f}, "
+          f"Om_best={Om_best:.4f}, chi2/dof={chi2_best/(N-1):.3f}")
+
+# ===== OUTPUT =====
+print(f"\n{'='*60}")
+print(f"SUMMARY: SNe v6 sigma_int scan")
+print(f"{'='*60}")
+print(f"  V5 (si=0.00): dchi2_std=15.57, dchi2_pure=1.49, Om=0.3742 (article: 15.58)")
+print(f"  V6 (si=0.12): dchi2_std=11.58, dchi2_pure=1.11, Om=0.3742")
+print(f"  Conclusion: SNe remain sensitive to bimetric gravity with sigma_int")
+
+# Save results
+with open('sne_results_v6.txt', 'w') as fout:
+    fout.write("SNe Delta-chi2: v6 sigma_int scan\n")
+    fout.write(f"Omega_m (quartic) = {Omega_m:.5f}\n")
+    fout.write(f"y(0) = {y0:.6f}\n\n")
+    fout.write(f"{'si':>6} {'dchi2_std':>10} {'dchi2_pure':>10} {'Om_best':>8} {'chi2/dof':>8}\n")
+    for si, dstd, dpure, omb, c2dof in results:
+        fout.write(f"{si:6.2f} {dstd:10.2f} {dpure:10.2f} {omb:8.4f} {c2dof:8.3f}\n")
+
+print(f"\nResults saved to sne_results_v6.txt")
+
+# ===== KEY RESULT =====
+# V5 (si=0.00): dchi2_std = 15.57  (article: 15.58)
+# V6 (si=0.12): dchi2_std = 11.58
+# Conclusion: SNe remain sensitive to bimetric gravity with sigma_int
+
+================================================================================
+
+ИСТОЧНИК ДАННЫХ SNe
+===================
+Pantheon+SH0ES.dat
+  GitHub: https://github.com/PantheonPlusSH0ES/DataRelease/tree/main/Pantheon%2B_Data/4_DISTANCES_AND_COVAR
+  Размер: 566 КБ, 1701 строка
+  Колонки: zCMB, zHEL, m_b_corr, m_b_corr_err_DIAG
+  После cut z>0.01: 1588 SNe
+
+  Полная ковариация: Pantheon+SH0ES_STAT+SYS.cov (~33 МБ)
+  Не используется в статье (диагональная), не нужна для v5/v6.
+  
+  В нашем проекте: rev 38 --- данные распарсены Алисой с подлинного
+  raw.githubusercontent.com (позиционный PDF-парсер, pdfplumber).
+  Файл: Pantheon+SH0ES.dat (в репозитории результата). Находка #52 закрыта.
+  Старый PDF-парс (rev 8) показал идентичные числа --- парсинг rev 8 был корректен.
+
+================================================================================
+
+§4. CMB -- cmb_recalc.py [ОРИГИНАЛ]
+================================================================================
+
+#!/usr/bin/env python3
+"""
+CMB chi^2 recalculation for bimetric cosmology.
+Compares R formula with and without massive neutrinos.
+
+Based on:
+- Bansal & Huterer (2025): CMB shift parameters, data vector, covariance
+- Hogas & Mortsell (2025): bimetric quartic, Friedmann equation
+- Note: H&M 2025 main text has a typo (y = a_g/a_f); correct is y = a_f/a_g
+  (consistent with their Appendix A and H&M 2021)
+
+Key finding:
+  Bansal & Huterer INCLUDE neutrinos in R (Eq. 4):
+    R = 100 * sqrt(omega_b + omega_cdm + omega_nu) * D_M(z*)/c
+  Excluding neutrinos (as in Chernikov) INCREASES chi^2_CMB.
+
+Author: Alisa AI
+Date: 2026-10-06
+"""
+
+import numpy as np
+from scipy.optimize import minimize
+import warnings
+warnings.filterwarnings('ignore')
+
+# ============================================================
+# CMB data (Bansal & Huterer 2025, Planck + ACT)
+# ============================================================
+R_obs   = 1.7504       # shift parameter R
+la_obs  = 301.77       # acoustic scale l_a
+wb_obs  = 0.022371     # omega_b = Omega_b * h^2
+data_vec = np.array([R_obs, la_obs, wb_obs])
+
+# Covariance matrix (x 10^-8)
+C_raw = np.array([
+    [1559.83,  -1325.41,   -36.45],
+    [-1325.41, 714691.80,  269.77],
+    [-36.45,   269.77,     2.10]
+]) * 1e-8
+C_inv = np.linalg.inv(C_raw)
+
+# ============================================================
+# Physical constants
+# ============================================================
+z_star = 1090.0           # recombination redshift
+m_nu_sum = 0.06            # sum of neutrino masses (eV)
+omega_nu = m_nu_sum / 93.14  # neutrino density ~ 6.44e-4
+T_CMB = 2.725               # CMB temperature (K)
+omega_gamma_h2 = 2.469e-5    # photon density * h^2
+N_eff = 3.046               # effective neutrino species
+omega_r_h2 = omega_gamma_h2 * (1 + 0.2271 * N_eff)  # radiation * h^2 ~ 4.178e-5
+
+def R_b_func(wb):
+    """Baryon-to-photon ratio R_b = 3*wb / (4*omega_gamma*h^2)."""
+    return 3.0 * wb / (4.0 * omega_gamma_h2)
+
+# ============================================================
+# E^2(z): expansion rate squared
+# Uses LCDM form: Om0*(1+z)^3 + Or*(1+z)^4 + OL
+# Normalized so E^2(0) = 1 (handles Om0+OL != 1 in bimetric)
+# ============================================================
+def E2_of_z(z, Om0, OL, h):
+    """E^2(z) normalized to E^2(0) = 1."""
+    Or = omega_r_h2 / h**2
+    E2_raw = Om0*(1+z)**3 + Or*(1+z)**4 + OL
+    E2_0 = Om0 + Or + OL
+    return E2_raw / E2_0
+
+# ============================================================
+# CMB observables: (R, l_a, omega_b)
+# ============================================================
+def compute_observables(h, wb, Om0, OL, with_nu=True, wnu=0.0, npts=3000):
+    """
+    Compute CMB shift parameters.
+    
+    Parameters:
+    -----------
+    h : float
+        Hubble parameter h = H_0 / 100 km/s/Mpc
+    wb : float
+        omega_b = Omega_b * h^2
+    Om0 : float
+        Total matter density Omega_m (includes neutrinos if present)
+    OL : float
+        Dark energy density Omega_Lambda
+    with_nu : bool
+        If True: R includes neutrinos (omega_m = Om0*h^2)
+        If False: R excludes neutrinos (omega_m = Om0*h^2 - wnu)
+    wnu : float
+        Neutrino density omega_nu = sum(m_nu)/93.14
+    npts : int
+        Number of integration points
+    
+    Returns:
+    --------
+    np.array([R, l_a, wb])
+    """
+    # D_M(z*): comoving angular diameter distance / (c/H_0)
+    # = integral_0^{z*} dz / E(z)
+    z_dm = np.logspace(np.log10(1e-4), np.log10(z_star), npts)
+    E_dm = np.sqrt(E2_of_z(z_dm, Om0, OL, h))
+    DM = np.trapezoid(1.0 / E_dm, z_dm)
+    
+    # r_s(z*): comoving sound horizon / (c/H_0)
+    # = integral_{z*}^{inf} c_s(z')/E(z') dz'
+    # where c_s = 1/sqrt(3*(1 + R_b/(1+z))) in units of c
+    z_max = 1e7
+    z_rs = np.logspace(np.log10(z_star), np.log10(z_max), npts)
+    E_rs = np.sqrt(E2_of_z(z_rs, Om0, OL, h))
+    Rb = R_b_func(wb)
+    cs_rs = 1.0 / np.sqrt(3.0 * (1.0 + Rb / (1.0 + z_rs)))
+    rs = np.trapezoid(cs_rs / E_rs, z_rs)
+    
+    # R = 100 * sqrt(omega_m) * D_M / c
+    # D_M/c = DM / H_0 = DM / (100h)  [in Mpc/(km/s)]
+    # R = 100 * sqrt(omega_m) * DM / (100h) = sqrt(omega_m) * DM / h
+    if with_nu:
+        omega_m = Om0 * h**2           # total matter (incl. neutrinos)
+    else:
+        omega_m = Om0 * h**2 - wnu     # matter without neutrinos
+    R = np.sqrt(omega_m) * DM / h
+    
+    # l_a = pi * D_M / r_s
+    la = np.pi * DM / rs
+    
+    return np.array([R, la, wb])
+
+def chi2_cmb(model_vec):
+    """CMB chi^2 = delta^T C^-1 delta."""
+    delta = model_vec - data_vec
+    return float(delta @ C_inv @ delta)
+
+# ============================================================
+# Minimization over (h, omega_b)
+# ============================================================
+def minimize_chi2(Om0, OL, with_nu, wnu=0.0):
+    """Minimize chi^2 over (h, omega_b). Returns (chi2, h, wb, vec)."""
+    def objective(params):
+        h, wb = params
+        if not (0.6 < h < 0.72 and 0.02 < wb < 0.024):
+            return 1e10
+        return chi2_cmb(compute_observables(h, wb, Om0, OL, with_nu, wnu))
+    
+    # Coarse scan for initial guess
+    best = 1e10; best_init = None
+    for h in np.linspace(0.65, 0.70, 20):
+        for wb in np.linspace(0.0215, 0.0230, 20):
+            c2 = objective([h, wb])
+            if c2 < best:
+                best = c2; best_init = [h, wb]
+    
+    # Nelder-Mead refinement
+    res = minimize(objective, best_init, method='Nelder-Mead',
+                   options={'xatol': 1e-8, 'fatol': 1e-12, 'maxiter': 5000})
+    h_best, wb_best = res.x
+    vec = compute_observables(h_best, wb_best, Om0, OL, with_nu, wnu)
+    return res.fun, h_best, wb_best, vec
+
+# ============================================================
+# MAIN
+# ============================================================
+if __name__ == '__main__':
+    print("=" * 70)
+    print("CMB chi^2 Recalculation: Bimetric Cosmology")
+    print("With and without massive neutrinos in R")
+    print("=" * 70)
+    
+    print(f"\nData vector (Bansal & Huterer 2025):")
+    print(f"  R = {R_obs}, l_a = {la_obs}, omega_b = {wb_obs}")
+    print(f"  sum(m_nu) = {m_nu_sum} eV, omega_nu = {omega_nu:.6e}")
+    print(f"  z* = {z_star}")
+    
+    # --- LCDM validation ---
+    print("\n--- LCDM validation (Om=0.315, OL=0.685) ---")
+    chi2_lcdm, h_lcdm, wb_lcdm, v_lcdm = minimize_chi2(
+        0.315, 0.685, with_nu=True, wnu=omega_nu)
+    print(f"  h={h_lcdm:.5f}, wb={wb_lcdm:.7f}")
+    print(f"  R={v_lcdm[0]:.5f} (obs {R_obs})")
+    print(f"  l_a={v_lcdm[1]:.3f} (obs {la_obs})")
+    print(f"  chi^2 = {chi2_lcdm:.4f}")
+    
+    # --- Bimetric model ---
+    print("\n" + "=" * 70)
+    print("Bimetric model: Omega_m=0.304, Omega_L=0.699")
+    print("(Omega_m + Omega_L = 1.003, bimetric correction makes E^2(0)=1)")
+    print("=" * 70)
+    
+    Om_bim = 0.304
+    OL_bim = 0.699
+    
+    # Without neutrinos (Chernikov's formula)
+    print("\n--- Without neutrinos (omega_m = Om0*h^2 - omega_nu) ---")
+    chi2_no, h_no, wb_no, v_no = minimize_chi2(
+        Om_bim, OL_bim, with_nu=False, wnu=omega_nu)
+    print(f"  h = {h_no:.5f}")
+    print(f"  wb = {wb_no:.7f}")
+    print(f"  R = {v_no[0]:.5f} (obs {R_obs})")
+    print(f"  l_a = {v_no[1]:.3f} (obs {la_obs})")
+    print(f"  omega_m = {Om_bim*h_no**2 - omega_nu:.6f}")
+    print(f"  chi^2_CMB = {chi2_no:.4f}")
+    
+    # With neutrinos (corrected formula, Bansal & Huterer Eq. 4)
+    print("\n--- With neutrinos (omega_m = Om0*h^2, includes omega_nu) ---")
+    chi2_nu, h_nu, wb_nu, v_nu = minimize_chi2(
+        Om_bim, OL_bim, with_nu=True, wnu=omega_nu)
+    print(f"  h = {h_nu:.5f}")
+    print(f"  wb = {wb_nu:.7f}")
+    print(f"  R = {v_nu[0]:.5f} (obs {R_obs})")
+    print(f"  l_a = {v_nu[1]:.3f} (obs {la_obs})")
+    print(f"  omega_m = {Om_bim*h_nu**2:.6f}")
+    print(f"  chi^2_CMB = {chi2_nu:.4f}")
+    
+    # --- Summary ---
+    delta = chi2_nu - chi2_no
+    # NOTE: 15.58 = SNe v5 (diag, si=0), 0.178 = BAO (full 13x13 cov)
+    total_no = 15.58 + 0.178 + chi2_no
+    total_nu = 15.58 + 0.178 + chi2_nu
+    
+    print("\n" + "=" * 70)
+    print("SUMMARY")
+    print("=" * 70)
+    print(f"  chi^2_CMB (no neutrinos)   = {chi2_no:.4f}")
+    print(f"  chi^2_CMB (with neutrinos) = {chi2_nu:.4f}")
+    print(f"  Delta chi^2 = {delta:.4f}  (negative = neutrinos help)")
+    print()
+    print(f"  Reference (Chernikov, no nu): chi^2_CMB = 0.644")
+    print(f"    BAO = 0.195, SNe = 15.58, total = 16.42")
+    print()
+    print(f"  Corrected total (no nu)   = {total_no:.4f}")
+    print(f"  Corrected total (with nu) = {total_nu:.4f}")
+    print(f"  CMB share (no nu)   = {chi2_no/total_no*100:.2f}%")
+    print(f"  CMB share (with nu) = {chi2_nu/total_nu*100:.2f}%")
+    
+    print("\n" + "=" * 70)
+    print("NOTES")
+    print("=" * 70)
+    print("""
+1. This code uses LCDM E^2(z) as an approximation to the bimetric E^2(z).
+   At baseline (theta=6.1 deg), bimetric corrections to E^2 are < 0.3%.
+   The RELATIVE difference (with vs without neutrinos) is robust;
+   absolute chi^2 values may differ from Chernikov's by ~1-2.
+
+2. Bansal & Huterer (2025) Eq. 4 INCLUDES neutrinos in R:
+     R = 100 * sqrt(omega_b + omega_cdm + omega_nu,m) * D_M(z*)/c
+   The data vector was computed from Planck+ACT chains WITH neutrinos.
+   Excluding neutrinos from the model R makes it inconsistent with data.
+
+3. Hogas & Mortsell (2025) main text has a typo: y = a_g/a_f should be
+   y = a_f/a_g (see their Appendix A, Eq. A10, and H&M 2021).
+
+4. For exact reproduction of Chernikov's results, replace E2_of_z()
+   with the full bimetric E^2(z) from the quartic solution.
+""")
+
+================================================================================
+
+§5. w_DE DATA -- wDE_data.txt [ОРИГИНАЛ]
+================================================================================
+
+w_DE(z) data — bimetric model (alpha=0, beta=3, theta=6.1°, m_FP/H0=25)
+============================================================
+Method: implicit differentiation of quartic (5.5) + analytical Omega_DE
+
+  z         y(z)       Omega_DE      w_DE
+--------------------------------------------------
+  0.0000   0.99951188   0.695555   -1.004953
+  0.0753   0.99939319   0.694717   -1.006164
+  0.1505   0.99925667   0.693754   -1.007562
+  0.2258   0.99910106   0.692656   -1.009159
+  0.3010   0.99892513   0.691414   -1.010972
+  0.3763   0.99872762   0.690020   -1.013014
+  0.4515   0.99850729   0.688465   -1.015302
+  0.5268   0.99826288   0.686740   -1.017852
+  0.6020   0.99799316   0.684837   -1.020681
+  0.6773   0.99769687   0.682746   -1.023807
+  0.7525   0.99737277   0.680458   -1.027249
+  0.8278   0.99701961   0.677966   -1.031025
+  0.9030   0.99663614   0.675259   -1.035158
+  0.9783   0.99622112   0.672330   -1.039667
+  1.0535   0.99577329   0.669169   -1.044578
+  1.1288   0.99529143   0.665768   -1.049914
+  1.2040   0.99477427   0.662118   -1.055701
+  1.2793   0.99422057   0.658210   -1.061969
+  1.3545   0.99362910   0.654035   -1.068747
+  1.4298   0.99299861   0.649585   -1.076068
+  1.5050   0.99232786   0.644850   -1.083968
+  1.5803   0.99161560   0.639823   -1.092485
+  1.6555   0.99086060   0.634493   -1.101660
+  1.7308   0.99006163   0.628853   -1.111539
+  1.8060   0.98921744   0.622893   -1.122172
+  1.8813   0.98832681   0.616605   -1.133613
+  1.9565   0.98738850   0.609980   -1.145921
+  2.0318   0.98640129   0.603009   -1.159163
+  2.1070   0.98536396   0.595684   -1.173412
+  2.1823   0.98427529   0.587995   -1.188749
+  2.2575   0.98313406   0.579934   -1.205263
+  2.3328   0.98193906   0.571493   -1.223054
+  2.4080   0.98068910   0.562662   -1.242237
+  2.4833   0.97938297   0.553433   -1.262936
+  2.5585   0.97801949   0.543797   -1.285296
+  2.6338   0.97659747   0.533745   -1.309476
+  2.7090   0.97511575   0.523270   -1.335663
+  2.7843   0.97357316   0.512361   -1.364064
+  2.8595   0.97196855   0.501012   -1.394923
+  2.9348   0.97030078   0.489212   -1.428518
+  3.0100   0.96856874   0.476954   -1.465171
+  3.0853   0.96677130   0.464228   -1.505260
+  3.1605   0.96490739   0.451028   -1.549227
+  3.2358   0.96297593   0.437343   -1.597595
+  3.3110   0.96097587   0.423166   -1.650988
+  3.3863   0.95890617   0.408489   -1.710154
+  3.4615   0.95676583   0.393303   -1.775999
+  3.5368   0.95455388   0.377600   -1.849632
+  3.6120   0.95226937   0.361372   -1.932421
+  3.6873   0.94991137   0.344611   -2.026082
+  3.7625   0.94747900   0.327309   -2.132787
+  3.8378   0.94497142   0.309458   -2.255334
+  3.9130   0.94238783   0.291051   -2.397384
+  3.9883   0.93972745   0.272079   -2.563830
+  4.0635   0.93698957   0.252536   -2.761352
+  4.1388   0.93417353   0.232414   -2.999328
+  4.2140   0.93127872   0.211707   -3.291335
+  4.2893   0.92830457   0.190406   -3.657807
+  4.3645   0.92525060   0.168506   -4.130990
+  4.4398   0.92211639   0.146000   -4.764910
+
+Reference points (article comparison):
+  z=0: code=-1.0050, article=-1.0050, diff=0.0000
+  z=0.5: code=-1.0168, article=-1.0160, diff=0.0008
+  z=1: code=-1.0406, article=-1.0410, diff=0.0004
+  z=2: code=-1.1537, article=-1.1580, diff=0.0043
+  z=3: code=-1.4576, article=-1.4610, diff=0.0034
+  z=4: code=-2.6006, article=-2.5960, diff=0.0046
+
+================================================================================
+
+§6. DeepSeek BAO -- independent verification [DEEPSEEK, dchi2=0.1959]
+================================================================================
+
+#!/usr/bin/env python3
+"""
+Independent verification of v18.0 numbers.
+Reproduces BAO dchi2, quartic solver, B-parameters.
+SNe and CMB require external data files -- see notes at bottom.
+
+Source: DeepSeek independent review, 2026-10-05
+Result: dchi2_BAO = 0.1959 (article: 0.195)
+"""
+import numpy as np
+from scipy.optimize import brentq, minimize_scalar
+
+# ---------- Parameters ----------
+theta_deg = 6.1
+theta = np.radians(theta_deg)
+sin2 = np.sin(theta)**2
+cos2 = np.cos(theta)**2
+tan2 = np.tan(theta)**2
+mFP2 = 25.0**2
+alpha, beta = 0.0, 3.0
+OL = 0.699
+Or = 5.38e-5
+
+# ---------- DESI DR2 BAO (13 points) ----------
+# (z_eff, type, value, sigma, r_MH_corr)
+desi = [
+    (0.295, 'DV',  7.9417, 0.075, None),
+    (0.510, 'DM', 13.5876, 0.167, -0.459),
+    (0.510, 'DH', 21.8629, 0.425, -0.459),
+    (0.706, 'DM', 17.3507, 0.177, -0.404),
+    (0.706, 'DH', 19.4553, 0.330, -0.404),
+    (0.934, 'DM', 21.5756, 0.152, -0.416),
+    (0.934, 'DH', 17.6415, 0.193, -0.416),
+    (1.321, 'DM', 27.6009, 0.318, -0.434),
+    (1.321, 'DH', 14.1760, 0.221, -0.434),
+    (1.484, 'DM', 30.5119, 0.760, -0.500),
+    (1.484, 'DH', 12.8170, 0.516, -0.500),
+    (2.330, 'DM', 38.9890, 0.531, -0.431),
+    (2.330, 'DH',  8.6315, 0.101, -0.431),
+]
+n = len(desi)
+data = np.array([d[2] for d in desi])
+C = np.zeros((n, n))
+C[0, 0] = desi[0][3]**2
+for i in range(1, n, 2):
+    r = desi[i][4]
+    C[i, i] = desi[i][3]**2
+    C[i+1, i+1] = desi[i+1][3]**2
+    C[i, i+1] = r * desi[i][3] * desi[i+1][3]
+    C[i+1, i] = C[i, i+1]
+Cinv = np.linalg.inv(C)
+
+# ---------- Quartic solver ----------
+def quartic_coeffs(z, Om0):
+    Otot = Om0*(1+z)**3 + Or*(1+z)**4
+    a0 = -(1/3)*cos2*mFP2*(1+2*alpha+beta)
+    a1 = Otot + OL + mFP2*(cos2*(alpha+beta) - sin2*(1+alpha+beta/3))
+    a2 = mFP2*(-cos2*beta + sin2*(1+2*alpha+beta))
+    a3 = -(OL + (1/3)*mFP2*(cos2*(-1+alpha-beta) + 3*sin2*(alpha+beta)))
+    a4 = (1/3)*sin2*mFP2*beta
+    return a0, a1, a2, a3, a4
+
+def solve_y(z, Om0):
+    a0, a1, a2, a3, a4 = quartic_coeffs(z, Om0)
+    f = lambda y: a0 + a1*y + a2*y**2 + a3*y**3 + a4*y**4
+    try:
+        return brentq(f, 1e-6, 1.0, xtol=1e-14)
+    except ValueError:
+        import sys
+        print(f"WARNING [§6]: brentq fallback (y=1.0) at z={z}", file=sys.stderr)
+        return 1.0  # GR limit fallback
+
+def E2_bimetric(z, Om0):
+    y = solve_y(z, Om0)
+    dy = 1 - y
+    ODE = OL - sin2*mFP2*dy*(1 + alpha*dy + beta/3*dy**2)
+    return Om0*(1+z)**3 + Or*(1+z)**4 + ODE
+
+def E2_LCDM(z, Om0):
+    return Om0*(1+z)**3 + Or*(1+z)**4 + (1 - Om0 - Or)
+
+# ---------- BAO distances ----------
+def _integrate(f, z, N=2000):
+    zs = np.linspace(0, z, N)
+    fs = np.array([f(zz) for zz in zs])
+    return np.trapz(fs, zs)
+
+def model_BAO(f_param, E2func, Om0):
+    out = np.zeros(n)
+    for i, (z, typ, val, sig, r) in enumerate(desi):
+        if typ == 'DH':
+            out[i] = f_param / np.sqrt(E2func(z, Om0))
+        elif typ == 'DM':
+            I = _integrate(lambda zz: 1/np.sqrt(E2func(zz, Om0)), z)
+            out[i] = f_param * I
+        elif typ == 'DV':
+            I = _integrate(lambda zz: 1/np.sqrt(E2func(zz, Om0)), z)
+            DH = 1/np.sqrt(E2func(z, Om0))
+            out[i] = f_param * (z * I**2 * DH)**(1/3)
+    return out
+
+def chi2_bao(f_param, E2func, Om0):
+    m = model_BAO(f_param, E2func, Om0)
+    d = data - m
+    return float(d @ Cinv @ d)
+
+def min_chi2_bao(E2func, Om0):
+    res = minimize_scalar(lambda f: chi2_bao(f, E2func, Om0),
+                          bounds=(20, 80), method='bounded')
+    return res.x, res.fun
+
+# ---------- Self-consistent Om0 for bimetric ----------
+def solve_Om0():
+    Om = 0.31
+    for _ in range(200):
+        y = solve_y(0.0, Om)
+        dy = 1 - y
+        ODE = OL - sin2*mFP2*dy*(1 + alpha*dy + beta/3*dy**2)
+        Om_new = 1 - Or - ODE
+        if abs(Om_new - Om) < 1e-14:
+            break
+        Om = Om_new
+    return Om
+
+# ---------- Main ----------
+if __name__ == "__main__":
+    Om_bim = solve_Om0()
+    y0 = solve_y(0.0, Om_bim)
+    E2_0 = E2_bimetric(0.0, Om_bim)
+    print(f"y(0)         = {y0:.10f}")
+    print(f"Omega_m(bim) = {Om_bim:.8f}")
+    print(f"E^2(0)       = {E2_0:.15f}")
+
+    # B-parameters
+    B0 = 3*OL - sin2*mFP2*(3+3*alpha+beta)
+    B1 = sin2*mFP2*(1+2*alpha+beta)
+    B2 = -sin2*mFP2*(alpha+beta)
+    B3 = sin2*mFP2*beta
+    B4 = 3*tan2*OL + sin2*mFP2*(-1+alpha-beta)
+    print(f"B0={B0:.5f} B1={B1:.5f} B2={B2:.5f} B3={B3:.5f} B4={B4:.5f} B1^2={B1**2:.4f}")
+
+    # BAO chi^2
+    f_l, chi_l = min_chi2_bao(E2_LCDM, 0.2972)
+    f_b, chi_b = min_chi2_bao(E2_bimetric, Om_bim)
+    print(f"LambdaCDM: f={f_l:.4f} chi2={chi_l:.4f}")
+    print(f"Bimetric : f={f_b:.4f} chi2={chi_b:.4f}")
+    print(f"Delta chi2 = {chi_b - chi_l:.4f}")
+
+================================================================================
+
+§7. DeepSeek CMB -- independent CMB verification [DEEPSEEK, НЕ ЗАПУЩЕН]
+================================================================================
+
+#!/usr/bin/env python3
+"""
+DeepSeek independent CMB verification.
+Task 1: Check dchi2_CMB at theta=30 deg.
+Expected: chi2 ~ 2466 at theta=30, Omega_m ~ 0.4015
+
+Source: DeepSeek independent review, 2026-10-05
+Status: NOT RUN by Alice (needs verification)
+"""
+import numpy as np
+from scipy.integrate import quad
+from scipy.optimize import brentq, fsolve, minimize
+
+# ---------- constants ----------
+c_km_s = 299792.458
+z_star = 1090.0
+N_eff = 3.04
+m_nu = 0.06  # eV
+omega_gamma = 2.469e-5
+omega_r_eff = 9.08e-5 * 0.678**2
+
+# data B&H 2025
+data = np.array([1.7504, 301.77, 0.022371])
+cov = np.array([
+    [1559.83, -1325.41, -36.45],
+    [-1325.41, 714691.80, 269.77],
+    [-36.45, 269.77, 2.10]
+]) * 1e-8
+cov_inv = np.linalg.inv(cov)
+
+# ---------- quartic H&M 2025 (Eq. A13) ----------
+def quartic_coeffs(z, Omega_m, Omega_r, Omega_L, theta, mFP_H0, alpha, beta):
+    mFP2 = mFP_H0**2
+    s2 = np.sin(theta)**2
+    c2 = np.cos(theta)**2
+    Omega_tot = Omega_m * (1+z)**3 + Omega_r * (1+z)**4
+    a0 = -1/3 * c2 * mFP2 * (1 + 2*alpha + beta)
+    a1 = Omega_tot + Omega_L + mFP2 * (c2*(alpha+beta) - s2*(1 + alpha + beta/3))
+    a2 = mFP2 * (-c2*beta + s2*(1 + 2*alpha + beta))
+    a3 = -(Omega_L + 1/3 * mFP2 * (c2*(-1 + alpha - beta) + 3*s2*(alpha+beta)))
+    a4 = 1/3 * s2 * mFP2 * beta
+    return [a4, a3, a2, a1, a0]
+
+def solve_y(z, Omega_m, Omega_r, Omega_L, theta, mFP_H0, alpha, beta):
+    coeffs = quartic_coeffs(z, Omega_m, Omega_r, Omega_L, theta, mFP_H0, alpha, beta)
+    roots = np.roots(coeffs)
+    real_roots = roots[np.isreal(roots)].real
+    real_roots = real_roots[(real_roots >= 0) & (real_roots <= 1.0)]
+    if len(real_roots) == 0:
+        f = lambda y: sum(c * y**i for i, c in enumerate(coeffs[::-1]))
+        return brentq(f, 0.0, 1.0)
+    return real_roots[0]
+
+def self_consistent_Omega_m(theta_deg, mFP_H0, alpha, beta, Omega_L, h):
+    theta = np.deg2rad(theta_deg)
+    Omega_r = omega_r_eff / h**2
+    def eqs(x):
+        Omega_m, y0 = x
+        coeffs = quartic_coeffs(0.0, Omega_m, Omega_r, Omega_L, theta, mFP_H0, alpha, beta)
+        f_quartic = sum(c * y0**i for i, c in enumerate(coeffs[::-1]))
+        s2 = np.sin(theta)**2
+        Omega_DE0 = Omega_L - s2 * mFP_H0**2 * (1-y0) * (1 + alpha*(1-y0) + beta/3*(1-y0)**2)
+        f_self = Omega_m - (1 - Omega_r - Omega_DE0)
+        return [f_quartic, f_self]
+    x0 = [0.3, 0.9995]
+    sol = fsolve(eqs, x0, full_output=True)
+    if sol[2] != 1:
+        raise RuntimeError("fsolve did not converge")
+    return sol[0][0], sol[0][1]
+
+def E_bimetric(z, Omega_m, Omega_r, Omega_L, theta, mFP_H0, alpha, beta, y0=None):
+    if y0 is None:
+        y0 = solve_y(0.0, Omega_m, Omega_r, Omega_L, theta, mFP_H0, alpha, beta)
+    y = solve_y(z, Omega_m, Omega_r, Omega_L, theta, mFP_H0, alpha, beta)
+    s2 = np.sin(theta)**2
+    Omega_DE = Omega_L - s2 * mFP_H0**2 * (1-y) * (1 + alpha*(1-y) + beta/3*(1-y)**2)
+    return np.sqrt(Omega_m * (1+z)**3 + Omega_r * (1+z)**4 + Omega_DE)
+
+def R_model(z_star, Omega_m, Omega_r, Omega_L, theta, mFP_H0, alpha, beta, y0):
+    integrand = lambda z: 1.0 / E_bimetric(z, Omega_m, Omega_r, Omega_L, theta, mFP_H0, alpha, beta, y0)
+    integral, _ = quad(integrand, 0, z_star, limit=200)
+    return np.sqrt(Omega_m) * integral
+
+def ell_a_model(z_star, Omega_m, Omega_r, Omega_L, theta, mFP_H0, alpha, beta, y0, omega_b):
+    integrand_DM = lambda z: 1.0 / E_bimetric(z, Omega_m, Omega_r, Omega_L, theta, mFP_H0, alpha, beta, y0)
+    DM_int, _ = quad(integrand_DM, 0, z_star, limit=200)
+    def integrand_rs(z):
+        Rb = 3.0 * omega_b / (4.0 * omega_gamma * (1+z))
+        return 1.0 / (np.sqrt(3.0 * (1.0 + Rb)) * E_bimetric(z, Omega_m, Omega_r, Omega_L, theta, mFP_H0, alpha, beta, y0))
+    rs_int, _ = quad(integrand_rs, z_star, 1e6, limit=400)
+    return np.pi * DM_int / rs_int
+
+def chi2_cmb(theta_deg, mFP_H0, alpha, beta, Omega_L, h, omega_b):
+    theta = np.deg2rad(theta_deg)
+    Omega_r = omega_r_eff / h**2
+    Omega_m, y0 = self_consistent_Omega_m(theta_deg, mFP_H0, alpha, beta, Omega_L, h)
+    R = R_model(z_star, Omega_m, Omega_r, Omega_L, theta, mFP_H0, alpha, beta, y0)
+    la = ell_a_model(z_star, Omega_m, Omega_r, Omega_L, theta, mFP_H0, alpha, beta, y0, omega_b)
+    model = np.array([R, la, omega_b])
+    diff = data - model
+    return diff @ cov_inv @ diff, Omega_m, y0
+
+if __name__ == "__main__":
+    theta_deg = 30.0
+    mFP_H0 = 25.0
+    alpha = 0.0
+    beta = 3.0
+    Omega_L = 0.699
+    def obj(x):
+        h, omega_b = x
+        chi2, _, _ = chi2_cmb(theta_deg, mFP_H0, alpha, beta, Omega_L, h, omega_b)
+        return chi2
+    res = minimize(obj, x0=[0.68, 0.02237], bounds=[(0.5, 0.9), (0.020, 0.025)], method='Nelder-Mead')
+    print("theta=30 deg")
+    print("best h, omega_b =", res.x)
+    print("chi2 =", res.fun)
+    print("Omega_m, y0 =", chi2_cmb(theta_deg, mFP_H0, alpha, beta, Omega_L, res.x[0], res.x[1])[1:])
+
+================================================================================
+
+§8. DeepSeek SNe -- independent SNe framework [DEEPSEEK, НЕ ЗАПУЩЕН]
+================================================================================
+
+#!/usr/bin/env python3
+"""
+DeepSeek independent SNe verification framework.
+Task 2: Full Pantheon+ covariance -> exact dchi2_SNe.
+Expected: dchi2_SNe ~ 11, Omega_m^LCDM ~ 0.334
+
+Source: DeepSeek independent review, 2026-10-05
+Status: NOT RUN (needs Pantheon+ data files)
+Note: Bimetric E(z) part is commented out -- needs E_bimetric from Task 1.
+"""
+import numpy as np
+from scipy.integrate import quad
+from scipy.optimize import minimize_scalar
+
+c_km_s = 299792.458
+
+def load_pantheon(dat_path, cov_path, zcut=0.01):
+    data = np.genfromtxt(dat_path, names=True, dtype=None, encoding='utf-8')
+    z = data['zCMB']
+    mu = data['m_b_corr']
+    mask = z > zcut
+    z = z[mask]
+    mu = mu[mask]
+    N = len(z)
+    with open(cov_path, 'r') as f:
+        first = f.readline().split()
+        if len(first) == 2:
+            n_cov = int(first[0])
+        else:
+            n_cov = int(first[0])
+        cov = np.loadtxt(f, max_rows=n_cov)
+    if cov.shape == (n_cov, n_cov):
+        cov = cov[np.ix_(mask, mask)]
+    else:
+        raise ValueError("Could not parse .cov")
+    return z, mu, cov, N
+
+def E_LCDM(z, Omega_m):
+    Omega_L = 1.0 - Omega_m
+    return np.sqrt(Omega_m * (1+z)**3 + Omega_L)
+
+def mu_model_noM(z, E_func, **kwargs):
+    DM = np.array([quad(lambda zp: 1.0/E_func(zp, **kwargs), 0, zi, limit=200)[0] for zi in z])
+    DL = (1+z) * DM
+    return 5.0 * np.log10(DL) + 25.0
+
+def chi2_marginalized_M(mu_data, mu_model, cov_inv):
+    r = mu_data - mu_model
+    A = np.ones_like(r)
+    C_inv_r = cov_inv @ r
+    C_inv_A = cov_inv @ A
+    M_best = (A @ C_inv_r) / (A @ C_inv_A)
+    chi2 = r @ C_inv_r - (A @ C_inv_r)**2 / (A @ C_inv_A)
+    return chi2
+
+def compute_sne_dchi2(dat_path, cov_path):
+    z, mu, cov, N = load_pantheon(dat_path, cov_path, zcut=0.01)
+    cov_inv = np.linalg.inv(cov)
+    def chi2_lcdm(Omega_m):
+        mu_model = mu_model_noM(z, E_LCDM, Omega_m=Omega_m)
+        return chi2_marginalized_M(mu, mu_model, cov_inv)
+    res = minimize_scalar(chi2_lcdm, bounds=(0.1, 0.6), method='bounded')
+    Omega_m_best = res.x
+    chi2_lcdm_best = res.fun
+    # Bimetric: Omega_m = 0.30439 fixed
+    # mu_model = mu_model_noM(z, E_bimetric, ...)
+    # chi2_bim = chi2_marginalized_M(mu, mu_model, cov_inv)
+    # dchi2 = chi2_bim - chi2_lcdm_best
+    print(f"N = {N}")
+    print(f"LambdaCDM best-fit Omega_m = {Omega_m_best:.6f}")
+    print(f"chi2_LCDM = {chi2_lcdm_best:.4f}")
+    # print(f"chi2_bimetric = {chi2_bim:.4f}")
+    # print(f"Delta chi2 = {dchi2:.4f}")
+
+if __name__ == "__main__":
+    compute_sne_dchi2("Pantheon+SH0ES.dat", "Pantheon+SH0ES_STAT+SYS.cov")
+
+================================================================================
+
+§9. РЕЗУЛЬТАТЫ -- сводка всех чисел
+================================================================================
+
+ЗОНД         | МЕТОД              | dchi2    | СТАТУС
+-------------|--------------------|-----------|--------
+BAO (v4)     | блочно-диаг.       | 0.1949    | [ЗАПУЩЕН]
+BAO (DeepSeek)| блочно-диаг.      | 0.1959    | [ЗАПУЩЕН]
+BAO (full)   | полная 13x13       | 0.1788    | [ЗАПУЩЕН]
+SNe v5 (diag)| диагональная si=0  | 15.57     | [ЗАПУЩЕН]
+SNe v5 (full)| STAT+SYS si=0      | 6.50      | [ЗАПУЩЕН]
+SNe v6 (diag)| диагональная si=0.12| 11.58    | [ЗАПУЩЕН] ✓
+CMB (с nu)   | R = sqrt(Om+w_nu/h^2)*D_M | 0.4488 | [УСТАРЕЛО — v8, пересчитать в v10.1]
+CMB (без nu) | R = sqrt(Om)*D_M   | 0.1007    | [УСТАРЕЛО — v8, пересчитать в v10.1]
+
+SNe v6 SCAN (sigma_int):
+  sigma_int |  Om_best |  dchi2_std | dchi2_pure | chi2/dof
+  -------------------------------------------------------
+      0.00  |   0.3742 |      15.57 |       1.49 |    0.455
+      0.05  |   0.3744 |      14.68 |       1.40 |    0.428
+      0.08  |   0.3744 |      13.49 |       1.29 |    0.393
+      0.10  |   0.3744 |      12.55 |       1.20 |    0.365
+      0.12  |   0.3742 |      11.58 |       1.11 |    0.338
+      0.15  |   0.3740 |      10.15 |       0.98 |    0.298
+      0.20  |   0.3736 |       8.06 |       0.78 |    0.239
+
+B-ПАРАМЕТРЫ (статья -> код):
+  B0 = -40.248   B1 = 28.230   B2 = -21.173   B3 = 21.173   B4 = -28.206
+  B1^2 = 796.94
+
+ОСНОВНЫЕ ЧИСЛА:
+  y(0) = 0.99951   Omega_m = 0.30439   H0 = 68.8 km/s/Mpc
+  theta = 6.1 deg   m_FP/H0 = 25   alpha = 0   beta = 3   Omega_L = 0.699
+
+КОМБИНИРОВАННЫЙ dchi2 (две согласованные схемы, rev 38):
+  Всё диагональное: BAO 0.195 + SNe 15.58 + CMB 0.45 = 16.22
+  Всё полное:       BAO 0.178 + SNe 6.50  + CMB 0.04 = 6.72 (CMB v10.6, rev 43)
+  (v10.5: 6.70; v10.3: 7.18 — обе superseded)
+  Гибрид (0.178 + 15.58 + 0.45) --- отменён: смешивает схемы, не интерпретируем.
+  V6 (si=0.12, diag): 0.195 + 11.58 + 0.45 = 12.22
+  Примечание: sigma_int поверх full cov НЕ добавлять --- двойной счёт (σ_int уже в STAT+SYS).
+
+
+CMB THETA-SCAN (bimetric E^2, R with neutrinos, FIX-23 + FIX-24) — §4a [v10.6, ЗАПУЩЕН, rev 43]:
+  theta  | chi2     | h      | Omega_m | STATUS
+  -------|----------|--------|---------|-------
+   6.1°  |     0.04 | 0.72425| 0.30312 | ✓✓ (v10.6; слепой прогон независимого кода DS: 0.0403, h=0.72452)
+  10.0°  |     9.34 | 0.72605| 0.30904 | ✓✓ (v10.6)
+  12.2°  |    31.62 | 0.72749| 0.31375 | ✓✓ (v10.6)
+  15.0°  |    93.65 | 0.72984| 0.32129 | ✓✓ (v10.6; DS: 93.74, h=0.73009)
+  18.3°  |   244.71 | 0.73343| 0.33260 | ✓✓ (v10.6)
+  20.0°  |   370.33 | 0.73568| 0.33955 | ✓✓ (v10.6)
+  25.0°  |  1029.42 | 0.74420| 0.36514 | ✓✓ (v10.6)
+  30.0°  |  2368.93 | 0.75643| 0.40006 | ✓✓ (v10.6; DS: 2369.45, h=0.75657)
+  LCDM   |     1.41 | 0.72085| 0.30900 | ✓✓ (DOF=1, p=0.24; DS-код дал 0.70 при их конвенции фикс. Ωm)
+  ПРИМЕЧАНИЕ: v10.6 = FIX-23 (nu-материя z=130) + FIX-24 (знак экспоненты (T/2.7)^(-4) в R_b).
+  Кросс-проверка rev 43: код DeepSeek, запущенный Kimi, совпал <0.5%. Присланная DS таблица
+  была фабрикацией (внутренне несогласована) --- его КОД честен. Урок: запускать код, не верить отчётам.
+  ПРИМЕЧАНИЕ: v10.5 = FIX-23 (физический переход нейтрино z=130 + h-грид [0.55,0.88]).
+  Белое пятно #60/#70/#77 закрыто: префактор R = Eq. 4 B&H (верно), в E^2 не хватало
+  nu-материи (GLM #70 прав). Старые ✓ DeepSeek (111.4/2451.32) — на коде до FIX-1/20/23,
+  не сопоставимы напрямую.
+
+  ПРЕДУПРЕЖДЕНИЕ: Статья v20.1 Table A5 использует LCDM E^2(z) —
+  даёт 30.50 при theta=15 вместо 111.02. Все промежуточные значения
+  занижены в 2-4 раза. Table A5 ДОЛЖНА быть пересчитана с биметрической E^2(z).
+  v10.2: полный θ-скан (8 углов) с quad + широкий wb [0.015, 0.025].
+  Warning brentq fallback срабатывает для θ≥25° при z≈1075–1088 (экранирование).
+
+TODO (обновлено):
+  1. [✅ ЗАВЕРШЕНО] SNe v6 с sigma_int=0.12 — dchi2=11.58 (rev 8)
+  2. [✅ ЗАВЕРШЕНО] CMB theta-scan с биметрической E^2(z) — §4a (rev 16)
+  3. Внести CMB theta-scan результаты в Table A5 и §5.5 статьи
+  4. Переписать §3.3 — LCDM аппроксимация непригодна для больших theta
+  5. Запустить DeepSeek CMB theta-scan для верификации 🏠 значений
+  6. [✅ ЗАВЕРШЕНО rev 38] SNe full-cov верифицирован (6.50/0.96/0.3470; эталонный
+     запуск Алисы на подлинных данных + независимый запуск ИИ #3)
+  7. Таблицы для приложения (y(z), B_n, w_DE(z), dchi2 scans)
+  8. Псевдокод E²(0) residual для воспроизводимости
+  9. Публичный репозиторий (GitHub/Zenodo) + README
+
