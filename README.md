@@ -1,79 +1,114 @@
-# BAO Blindness to Bimetric Gravity — Reproducible Code
+# BAO Blindness to Bimetric Gravity
 
-Companion code to the paper *"BAO Blindness to Bimetric Gravity:
-A Per-Probe Δχ² Decomposition"* (A. Chernikov, 2026, v21.5).
+Public working draft and versioned analysis archive for the bimetric-cosmology
+per-probe study by Aleksandr Chernikov.
 
-The repository reproduces every canonical number of the paper from scratch.
-Physics: Hassan–Rosen ghost-free bimetric gravity in the Högås & Mörtsell
-B-parameter formalism; baseline θ = 6.1°, m_FP/H₀ = 25, α = 0, β = 3,
-Ω_Λ = 0.699 (Högås & Mörtsell 2025, arXiv:2507.03743).
+**Current manuscript:** [v28.0, public working draft](BAO_Blindness_v28.0_public_draft.md),
+released 1 November 2026. The methodological audit is still in progress.
 
-## Quick start (5 minutes)
+## Read this first
+
+This repository contains materials from different stages of one continuing
+research programme. They are **not interchangeable**:
+
+- **v28.0 public working draft** is the current public account of the study.
+  It is not a final model-selection paper.
+- **Code archive v10.6** is the executable companion to manuscripts
+  v21.5/v21.6. It remains available as a legacy pipeline.
+- **Code archive v13.3** is included as a documentary source archive. It is
+  not claimed to be a drop-in executable that reproduces every number in
+  v28.0.
+- Manuscripts v21.5 and v21.6 and archive v10.6 are retained for provenance;
+  they are not silently rewritten.
+
+See [REPRODUCIBILITY.md](REPRODUCIBILITY.md) for the exact version boundaries
+and [CHANGELOG.md](CHANGELOG.md) for the public release history.
+
+## Scientific status of v28.0
+
+The draft decomposes bimetric-cosmology diagnostics by probe: DESI DR2 BAO,
+Pantheon+ SNe Ia, and a compressed-CMB geometric diagnostic. Its main
+conclusions are deliberately limited:
+
+- the reported BAO result concerns the tested baseline and per-probe diagnostic;
+- the compressed-CMB calculation is a conditional geometric diagnostic, not a
+  full Boltzmann/ISW calculation;
+- `f` and `M` are profiled, not marginalised;
+- per-probe profile likelihoods are not an integrated marginal posterior,
+  evidence, or Bayes factor;
+- descriptive arithmetic sums of per-probe χ² contributions are not a
+  certified joint likelihood or a model-selection p-value;
+- no accepted production P3/MCMC posterior is claimed;
+- a matched model comparison is still being audited.
+
+The earlier quantitative statement that late-ISW/S₈ effects must satisfy
+`Δχ²_CMB ≲ 10⁻³` is not supported by an end-to-end calculation and is
+explicitly withdrawn in v28.0.
+
+## Repository layout
+
+| Path | Content and status |
+|---|---|
+| `BAO_Blindness_v28.0_public_draft.md` | Current public working draft |
+| `BAO_Blindness_v28.0_public_draft.pdf` | PDF rendering of the same draft |
+| `BAO_Blindness_v21.5.md`, `BAO_Blindness_v21.6.md` | Historical manuscripts |
+| `Bimetric_Code_Archive_v10.6.txt` | Legacy executable source archive |
+| `Bimetric_Code_Archive_v13.3.txt` | Documentary source archive |
+| `bimetric/`, `probes/`, `tests/` | Legacy v10.6 pipeline |
+| `canonical_numbers.json` | Canonical numbers for the legacy v10.6/v21.x pair |
+| `verification/` | Historical independent-verification artefacts |
+| `figures/` | Available manuscript figures |
+| `REPRODUCIBILITY.md` | Version-specific reproduction instructions |
+
+## Legacy quick start — v10.6 only
+
+The following commands apply to the legacy v10.6 pipeline, **not to a full
+reproduction of manuscript v28.0**:
 
 ```bash
 pip install -r requirements.txt
-make test        # self-checks + regression vs canonical numbers (~1-2 min)
-make bao         # BAO: DESI DR2, Δχ² = 0.178 (full covariance)
-make cmb         # CMB θ-scan, 8 angles (several minutes)
-bash data/download_data.sh && make sne-full   # SNe full covariance (6.50)
+make test        # legacy self-checks and v10.6 regressions
+make bao         # legacy DESI DR2 BAO diagnostic
+make cmb         # legacy compressed-CMB theta scan
+bash data/download_data.sh && make sne-full
 ```
 
-## Layout
+The legacy background implementation uses the massive-neutrino transition at
+`1+z = 131`. This convention must not be confused with the exact-Fermi–Dirac
+P3 target discussed in the current draft and its ongoing audit.
 
-| Path | Content |
-|---|---|
-| `bimetric/core.py` | All background physics: quartic for y = a_f/a_g (H&M 2025, A13), E²(z) with the massive-ν transition at 1+z = 131, sound horizon, D_M, B-parameters. One implementation used by every probe. |
-| `probes/bao.py` | DESI DR2 (13 points), full 13×13 covariance or Table IV block-diagonal |
-| `probes/cmb_theta_scan.py` | Compressed Planck 2018 + ACT DR6 likelihood (Bansal & Huterer 2025), θ-scan 6.1°–30° |
-| `probes/sne.py` | Pantheon+ (1588 SNe, z > 0.01), diagonal or full STAT+SYS covariance, analytic M-marginalisation |
-| `canonical_numbers.json` | Every canonical number + tolerance + verification status |
-| `tests/run_checks.py` | Self-checks (quartic identity, Brent vs `numpy.roots`, …) + regression against the canonical numbers |
-| `verification/` | Independent verification artefacts: third-party code (written by external AI systems), run verbatim by the project, with logs and checksums |
+Pantheon+ data are downloaded from the official public release and are not
+committed here. Their original release terms continue to apply.
 
-## Canonical results (archive v10.6)
+## Historical canonical results — archive v10.6
 
-| Probe | Quantity | Value |
+| Probe | Quantity | Legacy value |
 |---|---|---|
 | Baseline | y(0), Ω_m, E²(0)−1 | 0.999512, 0.30439, 5·10⁻¹⁵ |
-| BAO | Δχ² (full cov) | **0.178** (p ≈ 0.66 — BAO is blind) |
-| SNe | Δχ² diagonal / full | **15.58** (upper bound) / **6.50** |
-| CMB | Δχ² at θ = 6.1° / 30° | **0.04** / **2368.93** |
-| Combined | all-full / all-diag | **6.72** / **16.22** |
+| BAO | Δχ², full covariance | 0.178 |
+| SNe | Δχ², diagonal / full | 15.58 / 6.50 |
+| CMB | Δχ² at θ = 6.1° / 30° | 0.04 / 2368.93 |
 
-Statistical conventions: σ_int is never added on top of the full STAT+SYS
-covariance (double counting); the diagonal SNe value is an upper bound.
+These values belong to the legacy v10.6/v21.x release. They are retained for
+provenance and regression testing, not presented as a completed v28.0
+production analysis.
 
 ## Verification history
 
-The CMB θ-scan was reproduced by **three independent codebases**, written by
-external AI systems from a blind specification (no target values) and executed
-verbatim by the project administrator:
+The legacy CMB θ-scan was checked by independent codebases written from a
+blind specification and executed by the project administrator. The historical
+artefacts and logs are in `verification/`. Independent implementation checks
+support particular numerical elements; they do not by themselves validate the
+physical transfer of a GR-calibrated compressed likelihood or establish a
+full model-selection result.
 
-| Code | χ²(6.1°) | χ²(15°) | χ²(30°) |
-|---|---|---|---|
-| This repository (v10.6) | 0.04 | 93.65 | 2368.93 |
-| DeepSeek (rev 43) | 0.0403 | 93.74 | 2369.45 |
-| Qwen (rev 44) | 0.04028 | 93.7396 | 2369.4494 |
-| GLM (rev 46) | 0.040282 | 93.739590 | 2369.449491 |
+## Citation and archive
 
-The 0.1%-level offsets are convention-level (minimiser, quadrature details);
-one cross-check (rev 43) localised a genuine bug in our sound-speed formula
-(fixed as FIX-24). Verification artefacts live in `verification/`.
-
-## Data
-
-- DESI DR2 BAO: embedded (13 points + covariance, from
-  [CobayaSampler/bao_data](https://github.com/CobayaSampler/bao_data), DESI
-  DR2, arXiv:2503.14738).
-- Pantheon+: downloaded by `data/download_data.sh` from the public
-  [DataRelease](https://github.com/PantheonPlusSH0ES/DataRelease)
-  (Brout et al. 2022; Scolnic et al. 2022). Not committed to the repo.
-
-## Citation
-
-See `CITATION.cff`. If you use this code, please cite the paper and this
-repository (a Zenodo DOI will be attached to releases).
+See [CITATION.cff](CITATION.cff). The versioned Zenodo record is
+[10.5281/zenodo.23292160](https://doi.org/10.5281/zenodo.23292160).
+Please cite the manuscript version and code/archive version actually used.
 
 ## License
 
-MIT (code). The Pantheon+ data remain under their original release terms.
+MIT for the code, unless a file states otherwise. External data remain under
+their original release terms.
