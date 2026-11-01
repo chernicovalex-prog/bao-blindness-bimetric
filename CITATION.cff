@@ -1,10 +1,23 @@
 cff-version: 1.2.0
-message: "If you use this software, please cite it as below."
-title: "BAO Blindness to Bimetric Gravity: reproducible analysis code"
+message: "Cite the current public draft or the legacy code version actually used."
+title: "Per-Probe Decomposition of Bimetric Cosmology: BAO Blindness and a Baseline Scalar-Sector Diagnostic"
 authors:
   - family-names: Chernikov
     given-names: Aleksandr
-version: v10.6
-date-released: 2026-10-10
-doi: 10.5281/zenodo.23292160
+version: v28.0-public-draft.1
+date-released: 2026-11-01
+doi: 10.5281/zenodo.23292159
+repository-code: "https://github.com/chernicovalex-prog/bao-blindness-bimetric"
 license: MIT
+preferred-citation:
+  type: article
+  title: "Per-Probe Decomposition of Bimetric Cosmology: BAO Blindness and a Baseline Scalar-Sector Diagnostic"
+  authors:
+    - family-names: Chernikov
+      given-names: Aleksandr
+  year: 2026
+  date-published: 2026-11-01
+  version: "v28.0 public working draft"
+  doi: 10.5281/zenodo.23292159
+  url: "https://github.com/chernicovalex-prog/bao-blindness-bimetric"
+  notes: "Public working draft; the methodological audit continues. The DOI shown here resolves to the latest version in the record family; use the version-specific DOI displayed by Zenodo when available. Legacy executable archive v10.6 has DOI 10.5281/zenodo.23292160."
