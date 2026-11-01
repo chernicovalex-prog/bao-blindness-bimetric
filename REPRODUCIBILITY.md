@@ -14,7 +14,7 @@ archive version must always be cited together.
 | v28.0 public working draft | v10.6 retained; v13.3 documentary archive included | Current scientific account with audit-qualified conclusions; **not** full one-command numerical reproduction |
 
 The files of earlier releases are retained rather than overwritten. The DOI
-`10.5281/zenodo.23292160` identifies the Zenodo record family; individual
+`10.5281/zenodo.23292159` identifies the Zenodo record family; individual
 versions may also receive version-specific DOIs from Zenodo.
 
 ## Reproducing the legacy v10.6 pipeline
@@ -89,4 +89,4 @@ Cite all applicable identifiers explicitly, for example:
 - legacy execution: code archive v10.6 and its corresponding v21.x manuscript;
 - later source inspection: documentary archive v13.3;
 - persistent archive: the relevant Zenodo version DOI, or the record-family
-  DOI `10.5281/zenodo.23292160` when a version DOI is unavailable.
+  DOI `10.5281/zenodo.23292159` when a version DOI is unavailable.

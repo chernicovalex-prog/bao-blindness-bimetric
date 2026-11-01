@@ -57,7 +57,7 @@ explicitly withdrawn in v28.0.
 | `bimetric/`, `probes/`, `tests/` | Legacy v10.6 pipeline |
 | `canonical_numbers.json` | Canonical numbers for the legacy v10.6/v21.x pair |
 | `verification/` | Historical independent-verification artefacts |
-| `figures/` | Available manuscript figures |
+| `Fig3_theta_scan.png`, `FigD1_SNe_reference_sensitivity.png` | Available manuscript figures |
 | `REPRODUCIBILITY.md` | Version-specific reproduction instructions |
 
 ## Legacy quick start — v10.6 only
@@ -105,8 +105,10 @@ full model-selection result.
 ## Citation and archive
 
 See [CITATION.cff](CITATION.cff). The versioned Zenodo record is
-[10.5281/zenodo.23292160](https://doi.org/10.5281/zenodo.23292160).
-Please cite the manuscript version and code/archive version actually used.
+[10.5281/zenodo.23292159](https://doi.org/10.5281/zenodo.23292159), which
+resolves to the latest version in the record family. Legacy executable v10.6
+has the version-specific DOI `10.5281/zenodo.23292160`. Please cite the
+manuscript version and code/archive version actually used.
 
 ## License
 

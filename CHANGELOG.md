@@ -1,5 +1,15 @@
 # Public release history
 
+## Package v28.0-public-draft.1 — 1 November 2026
+
+- Corrected the Zenodo record-family DOI to `10.5281/zenodo.23292159`; the
+  separate DOI `10.5281/zenodo.23292160` remains specific to legacy v10.6.
+- Updated `CITATION.cff` for the current public working draft while retaining
+  the legacy-code citation boundary.
+- Placed the two available PNG figures in the repository root and updated the
+  manuscript links so the figures render on GitHub.
+- No scientific numbers, conclusions, or manuscript version were changed.
+
 ## v28.0 public working draft — 1 November 2026
 
 - Added the current public working draft in Markdown and PDF.

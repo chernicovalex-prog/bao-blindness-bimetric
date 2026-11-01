@@ -4,12 +4,12 @@ Use a **new version** of the existing Zenodo record. Do not overwrite or delete
 the published v10.6 files.
 
 - **Title:** Per-Probe Decomposition of Bimetric Cosmology: BAO Blindness and a Baseline Scalar-Sector Diagnostic
-- **Version:** v28.0-public-draft
+- **Version:** v28.0-public-draft.1
 - **Publication date:** 2026-11-01
 - **Author:** Aleksandr Chernikov
 - **Resource type:** Software / publication package (retain the existing record's resource type if Zenodo does not permit changing it)
 - **License:** MIT for code; external data remain under their original terms
-- **Record-family DOI:** 10.5281/zenodo.23292160
+- **Record-family DOI:** 10.5281/zenodo.23292159
 - **Keywords:** bimetric gravity; BAO; DESI DR2; Pantheon+; compressed CMB; profile likelihood; reproducibility; working draft
 
 ## Description
@@ -36,7 +36,7 @@ from scratch. See REPRODUCIBILITY.md for exact version boundaries.
 ## Recommended related identifiers
 
 - GitHub repository: https://github.com/chernicovalex-prog/bao-blindness-bimetric
-- Earlier Zenodo version / record family: https://doi.org/10.5281/zenodo.23292160
+- Earlier Zenodo version / record family: https://doi.org/10.5281/zenodo.23292159
 
 ## Upload check
 
