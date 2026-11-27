@@ -1,0 +1,41 @@
+\section{Introduction}\label{sec:intro}
+
+Bimetric gravity \citep{Hassan2012} extends general relativity by a dynamical second metric $f_{\mu\nu}$ coupled to the physical metric $g_{\mu\nu}$ through a Fierz--Pauli mass term, while remaining ghost-free at the fully nonlinear level. It admits viable cosmological solutions on an FLRW background \citep{vonStrauss2012,Comelli2012,Bassi2023}.
+
+This is an independent re-analysis of the published benchmark of \citet[][H\&M]{Hogas2025}, not a continuation by its authors or a report of private H\&M results. The author was not involved in that work; all inputs attributed to it are taken from the public paper. H\&M combined DESI BAO, CMB and SNe~Ia data in a joint MCMC analysis of the bimetric parameter space (extending their earlier analytical and observational studies, \citealp{Hogas2021,Hogas2021b}) and found a benchmark configuration at $\theta=6.1\deg$ ($+1.7/-2.1$), $\OL=0.699\pm0.004$, $H_0=69.0\pm0.4\ \mathrm{km\,s^{-1}\,Mpc^{-1}}$.
+We keep their benchmark but change the question. Instead of asking where the joint posterior peaks, we decompose the constraining power of each probe individually: which probes constrain the benchmark, which are insensitive to it, and why.
+The decomposition delivers a diagnosis that the joint analysis alone cannot. BAO is statistically indistinguishable from \LCDM{} at the benchmark ($\Dchi=0.179$), SNe~Ia retain a density-driven penalty, and the compressed CMB geometric proxy is fitted to very high precision at the benchmark ($\chi^2=0.0001703$ under the adopted $\lambda=0$ protocol), although its fixed-map $\theta$ scan is protocol dependent. We then ask which of these statements belongs to the bimetric theory and which to the chosen point, by profiling the anchor $\OL$ across the scanned $(\theta,\OL)$ plane. Finally, we ask whether background success translates into physical viability. Within the adopted linear/WKB diagnostic, the benchmark exhibits a gradient-unstable window. Thus, a good background fit is not, by itself, evidence for viability of the point or for preference of the underlying theory; our scalar result diagnoses this distinction rather than proving nonlinear exclusion.
+
+\paragraph{Provenance of the benchmark.}
+The benchmark combines parameters from different sources, and we state this explicitly. We analyse a representative benchmark anchored to the marginalised constraints reported by H\&M, not an independently identified joint maximum-likelihood solution (their MCMC delivers marginal posteriors and a mass lower bound, not a full maximum-a-posteriori vector). The mixing angle $\theta=6.1\deg$ and the anchor $\OL=0.699$ follow their best fit. H\&M did not obtain informative constraints on the remaining parameters (their posteriors in $\mFP$, $\alpha$ and $\beta$ are flat, with only a 68\% lower bound $\mFP\gtrsim20\,H_0$); we therefore adopt the standard finite-branch convention $\alpha=0$, $\beta=3$ and $\mFP/H_0=25$, above their lower bound. The sensitivity/blindness pattern of the three probes is thus a testable diagnostic hypothesis for the tested model settings, not an established property of the full class.
+
+\paragraph{Contributions.}
+Relative to H\&M we provide:
+(1)~the per-probe $\Dchi$ decomposition, with the full Pantheon+ STAT+SYS covariance as the primary SNe estimate;
+(2)~the controlled late-time dark-degeneracy mechanism (the general dark-sector degeneracy of \citet{Kunz2009}; the bimetric effective density $\cos^2\theta\,\Om$ of \citet{Hogas2021}), quantified here to $3.4\times10^{-5}$ over the BAO/SNe window, as one mechanism with two distinct observational consequences: BAO shape blindness and SNe density sensitivity;
+(3)~the anchor profile, showing that the optimum of the scanned plane is consistent with the adopted benchmark and that the residual tension floor belongs to SNe~Ia;
+(4)~a quantitative linear/WKB scalar-sector diagnostic and the self-similar reduction of its boundary: the universal variable $u$, the branch constants, an exact algebraic certificate for the reduced $\varepsilon=0$ branch, a full-model numerical scan and the reference mass map (\cref{sec:selfsim} and \cref{app:selfsim}); and
+(5)~a single reproducible code base in which every number and figure of this paper is regenerated from the public data files (\cref{app:repro}).
+\Cref{tab:compare} summarises the comparison with H\&M.
+
+\begin{table}[t]
+\centering\small
+\caption{Comparison with \citet{Hogas2025}.}\label{tab:compare}
+\begin{tabularx}{\textwidth}{@{}l>{\raggedright\arraybackslash}p{4.0cm}>{\raggedright\arraybackslash}X@{}}
+\toprule
+Aspect & H\&M 2025 & This work\\
+\midrule
+Data & BAO + CMB + SNe~Ia (combined) & Each probe individually\\
+Method & MCMC (joint) & Grid scan + Brent minimisation per probe; anchor profiling\\
+$\Om$ & Derived from the quartic (varies in the MCMC) & Fixed by the quartic closure\\
+$\Dchi$ decomposition & Not reported as a per-probe $\Dchi$ decomposition & Per probe (\cref{tab:scans}) and anchor profile (\cref{tab:anchor})\\
+BAO blindness & Not quantified & $\Dchi=0.179$ (full covariance) at the adopted anchor; dark-degeneracy residual $0.022$ against the $\Om^{\rm eff}$ model; flat over 19 $(\alpha,\beta)$ points and 3.8 decades in $\mFP/H_0$ at fixed anchor, but not blind to $\OL$\\
+SNe sensitivity & Not quantified & $\Dchi=7.32$ (diagonal), $2.94$ (full covariance); driven by the density mismatch\\
+CMB sensitivity to $\theta$ & Not isolated & Structural saturation within the mapping; fixed-map $\theta$ constraints are protocol dependent (\cref{sec:cmbres})\\
+Anchor & Best-fit parameter & Profiled under the adopted $\lambda=0$ CMB protocol: minimum $2.98$ at $5\deg$, $\OL^*=0.6951$; at $6.1\deg$, the optimized anchor $0.6976$ is $0.06$ above it and the adopted $0.699$ by $0.14$; the GR-side floor is $\Dchi\simeq0.9$ above the minimum. Descriptive per-probe sum (\cref{sec:anchor})\\
+Round-trip test & Not performed & $10^{-10}$ (B-parameters), $10^{-12}$ ($E^2(0)$)\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\citet{Luben2020} showed that the early universe in bimetric theory is screened by the Vainshtein mechanism on an FLRW background, and that a minimal $\beta_0$--$\beta_1$--$\beta_4$ model can ease the $H_0$ tension through an effective phantom dark-energy component in the redshift interval $1\lesssim z\lesssim10$. (Their minimal-model best fit sits at $\mFP\sim0.6\,H_0$, far from the mass scale studied here; we cite the screening mechanism, not their parameter values.) Their finding that current BAO data do not distinguish bimetric models from \LCDM{} is consistent with, and complementary to, our analysis: we quantify this indistinguishability at the adopted anchor and show that it does not persist when the anchor is varied.
