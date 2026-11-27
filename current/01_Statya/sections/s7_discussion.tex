@@ -1,0 +1,129 @@
+\section{Discussion}\label{sec:discussion}
+
+\subsection{Vainshtein screening: the per-probe mechanism}\label{sec:vainshtein}
+The fixed-anchor blindness of BAO, the density sensitivity of SNe and the protocol dependence of the CMB arise from the interplay of two distinct mechanisms: the de~Sitter attractor ($y\to1$) that suppresses the bimetric correction at late times, and the Vainshtein screening \citep{Luben2020} that operates in the early universe. The critical Hubble rate is $H_c\sim\mFP$. For $H>\mFP$ (early universe, $z\gtrsim12$ at $\mFP/H_0=25$) Vainshtein screening is active and the background modification is suppressed; for $H<\mFP$ (late universe, $z\lesssim12$) the background is unscreened and the bimetric correction is present, with GR approached through the de~Sitter attractor.
+
+\emph{BAO} measures $D_M/r_d$ and $D_H/r_d$ at $z<2.33$, the late universe where screening is inactive. At the adopted anchor the bimetric background there is \LCDM{} with $\Om^{\rm eff}=\cos^2\!\theta\,\Om=0.30096$ to within a maximum relative residual of $3.4\times10^{-5}$ in $E^2$ over $z\le2.33$ (verified): the degeneracy \citep{Kunz2009}, not a smallness accident, is why the correction leaves almost no shape signal. Profiling of $f$ removes any residual constant rescaling. The combination yields $\Dchi=0.18$, and the blindness to $(\alpha,\beta,\mFP,\theta)$ across the fixed-anchor scans is the blindness of these distance ratios to the degenerate direction; it does not imply blindness to $\OL$.
+
+\emph{SNe~Ia} measure $D_L(z)$ at $z<2.26$, in the same late-time regime. The integral of $1/E$ sees the same dark-degenerate background, and the pure bimetric correction against the effective model is sub-detectable. A uniform rescaling $E\to AE$ is absorbed by the absolute magnitude $M$ through the constant shift $\Delta\mu=-5\log_{10}A$, just as it is absorbed in BAO by $f=c/(H_0r_d)$. Thus the SNe penalty is not evidence for an absent scale degeneracy: $M$ removes any constant distance normalization, although it cannot remove the redshift-dependent residual. The resulting $\Dchi=7.32/2.94$ is dominated by the mismatch between the anchor-implied effective density $\cos^2\!\theta\,\Om=0.301$ and the Pantheon+ preference $\Om=0.350$ (diagonal) or $0.331$ (full covariance). The negative bimetric $E^2(z)$ correction shifts the model in the wrong direction relative to the SNe-preferred $\Om$, amplifying rather than compensating the discrepancy. This is the opposite of BAO, where $\Om^{\rm bim}=0.304>\Omega_{\rm m}^{\rm BAO,\,best}=0.297$ and the correction partially compensates.
+
+\emph{The CMB} measures $D_M(z_{\rm rec})$, integrated from $z=0$ to $z_{\rm rec}$, and the sound horizon from $z_{\rm rec}$ to infinity (sound speed $c_s=c/\sqrt{3(1+R_b)}$; \citealp{HuSugiyama1995}). $D_M(z_{\rm rec})$ traverses both regimes. Although the correction in the unscreened regime is small (at most $1.11\%$ anywhere, reached near $z=5$), it accumulates coherently along the unscreened part of the line of sight and produces a geometric shift under the adopted transplant: the unscreened region ($z\lesssim12$) supplies $72.2\%$ of $D_M(z_{\rm rec})$ while spanning about $1\%$ of the redshift range (\cref{tab:A4}). At the benchmark and $\lambda=0$, however, the compressed CMB $\chi^2=0.0001703$: the shift is fitted to very high precision, not a detectable penalty. The geometric weighting of the integral is a property of any cosmology and is not itself the signal. The sound horizon lies entirely in the screened regime and is less affected.
+
+\subsection{Phantom dark-energy phase}
+The effective equation of state satisfies $w_{\rm DE}(z)<-1$ on the positive-$\ODE$ branch up to the zero crossing; this is a robust feature of the benchmark within the adopted definition (\cref{sec:theory}). Relative to the dark-degenerate effective background the effective equation of state is $-1$ to within the $3.4\times10^{-5}$ residual; the phantom branch refers to the true-density bookkeeping. A two-parameter CPL fit is not applicable beyond $z=4$: $\ODE(z)$ changes sign at $z=4.882$ and tends to $-13.42$ at higher $z$. There $w_{\rm DE}$ diverges; beyond the crossing $\ODE<0$, so the conventional dark-energy interpretation is no longer appropriate, although $w_{\rm DE}=p_{\rm DE}/\rho_{\rm DE}$ remains defined wherever $\ODE\neq0$.
+
+\subsection{The combined picture}\label{sec:combined}
+For each point $\phi=(\theta,\Omega_\Lambda)$ we define the descriptive composite score
+\begin{equation}
+S(\phi)=\sum_{i\in\{\mathrm{BAO,SNe,CMB}\}}\left[\chi_i^2(\phi)-\chi^2_{i,\mathrm{ref}}\right],
+\end{equation}
+where each reference is the minimum of the corresponding flat \LCDM{} fit. Different references shift this score by a constant without invalidating the definition, but do not turn it into a joint likelihood: the probes carry different nuisance parameters and conventions, and no shared probability model is constructed. We therefore use ``summed per-probe profile'' and ``composite minimum/penalty'', not model-selection significance. At the benchmark $S=0.179+2.936+0.000170=3.115$, matching the $\OL=0.699$ row of \cref{tab:anchor}. The split radiation and closure conventions of \cref{tab:conv} shift this sum by less than $0.02$ (the BAO radiation-convention effect is $0.014$ at the benchmark, below $0.01$ for SNe), so the mixed-convention sum is accurate to the quoted precision. Shared nuisance parameters would require an explicit joint treatment, and no $p$-value is assigned.
+
+For comparison, H\&M report a modest preference for bimetric gravity over $\Lambda$CDM, at roughly $1\sigma$, in their joint BAO+CMB+SNe analysis \citep{Hogas2025}. This is a joint fit result obtained with a different likelihood and inference procedure. Here we do not implement their joint fit and do not reproduce their numerical $\Delta\chi^2_{\rm MAP}$ values.
+
+A shared-matter-density \LCDM{} comparator places these differences on one absolute scale. Using one $\Omega_m$ across BAO, SNe and CMB, while profiling $f$, $M$ and the CMB $(h,\omega_b)$ within their respective probes, gives a grid minimum at $\Omega_m=0.31$ with summed absolute $\chi^2=1417.121$, compared with $1413.200$ for the sum of separate per-probe \LCDM{} minima. The adopted bimetric benchmark and the scanned per-$\theta$ minimum lie $0.81$ and approximately $0.94$ below this shared-$\Omega_m$ comparator, respectively, whereas the GR-side row nearly coincides with it. A common $h$ across all three probes is not defined here because $f$ and $M$ are profiled independently. This comparator retains the same mixed-probe conventions and the adopted $\lambda=0$ bimetric protocol; it is not a reproduction of the H\&M joint MCMC or a new model-selection significance. The underlying saved result is \code{results/anchor\_scan.json:lcdm\_shared}.
+
+\subsection[Profiling the anchor: the joint (theta, Omega Lambda) plane]{Profiling the anchor: the joint \texorpdfstring{$(\theta,\OL)$}{(theta, Omega_Lambda)} plane}\label{sec:anchor}
+The per-probe diagnostics above are evaluated at a fixed benchmark, and a legitimate question is how much of their pattern is a property of the theory and how much of the chosen point. To separate the two we profile the anchor: for each point of a $(\theta,\OL)$ grid the quartic closure supplies $\Om$, each probe's nuisance parameters are profiled as in \cref{sec:bao,sec:sne,sec:cmb}, and the per-probe $\Dchi$ values (each against its own \LCDM{} best fit) are summed. The anchor plane and both profiles use the adopted $\lambda=0$ CMB protocol. This is profiling, not marginalisation; $\alpha$, $\beta$ and $\mFP$ are held at the benchmark.
+
+\subsubsection{Per-probe anchor profiles}\label{sec:anchor1d}
+The one-dimensional profiles at $\theta=6.1\deg$ (\cref{tab:anchor}, \cref{fig:anchorprofile}) show three pulls in competition. BAO and the CMB prefer $\OL=0.699$, the grid minimum; their penalties grow steeply towards lower values ($+100.57$ and $+150.50$ at $0.60$). SNe prefer $\OL\simeq0.668$ (penalty $0.0007$) and deteriorate towards higher values. Near the benchmark, the joint profile reaches a fine-grid minimum at $\OL=0.696$ with $\Dchi=3.140$, while at $\OL=0.699$ it has $\Dchi=3.115$, of which $2.94$ belongs to SNe. Moving the anchor to the SNe-preferred region ($0.668$) would reduce the SNe penalty to $0.0007$ but raises the BAO and CMB penalties to $+14.28$ and $+18.19$: the joint penalty worsens from $3.12$ to $32.48$.
+The refined profile (spacing $0.004$) places the continuous vertex at $\OL^*=0.6976$ (joint $3.046$); the benchmark sits essentially at the vertex of the $\OL$ profile ($\Dchi=0.07$), and in the $\theta$ profile of \cref{tab:thetaprofile} it sits $0.06$ above the minimum: the two numbers refer to two different profile directions. The one-parameter tolerances on the anchor at $\theta=6.1\deg$, interpolated from the fine profile ($0.66$--$0.74$), are $\OL\in[0.692,\,0.703]$ ($\Dchi=1$ above the minimum) and $[0.687,\,0.708]$ ($\Dchi=3.84$). A Monte-Carlo calibration of exactly this statistic (\texttt{src/profile\_calibration.py}): 2000 synthetic realisations of the benchmark at the true anchor ($\theta=6.1\deg$, $\OL=0.699$) with the real covariances (canonical scheme: noise $\sim N(0,C)$ with the published covariance $C$ and $\chi^2=r^{\top}C^{-1}r$, exactly as in the per-probe modules), rerun through the full per-probe profiling chain on the same fine grid as the quoted tolerances, give a coverage of the true anchor of $68.3\%$ for the $\Dchi=1$ band and $95.35\%$ for the $\Dchi=3.84$ band, with the profile median at the true anchor. This is a Monte Carlo coverage calibration at the benchmark-as-truth point, not a general proof of Wilks coverage. The quoted bands are therefore approximate $68\%$/$95\%$ intervals for this synthetic calibration, while the real-data profile sum remains descriptive. Two robustness checks accompany the calibration: an offset-grid run (the same grid shifted by $+0.002$, so that the true anchor is not a grid point; 1000 realisations) reproduces the coverage within Monte-Carlo error ($68.0\%$/$95.3\%$), and on 25 synthetic realisations the linearised CMB profiling used per realisation is compared with the exact warm-started optimisation over the whole grid (maximal bias $3.895\times10^{-4}$ in $\Dchi$; \texttt{src/cmb\_linbias\_check.py}). The linearised per-realisation path is an approximation, not an exact-MC claim.
+
+\begin{table}[t]
+\centering\small
+\caption{Anchor profile at $\theta=6.1\deg$ (per-probe and joint) under the adopted $\lambda=0$ CMB protocol. The joint column is a descriptive sum of per-probe $\Dchi$ against three different \LCDM{} references, not a joint likelihood. All values use the corrected neutrino convention; the fine profile (spacing $0.004$) is stored in \code{results/anchor\_scan.json} as \code{profile\_1D\_fine}.}\label{tab:anchor}
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+$\OL$ & BAO & SNe & CMB & joint\\
+\midrule
+$0.600$ & $100.57$ & $12.952$ & $150.50$ & $264.02$\\
+$0.620$ & $69.33$ & $6.659$ & $101.65$ & $177.64$\\
+$0.640$ & $42.47$ & $2.359$ & $60.28$ & $105.11$\\
+$0.660$ & $21.05$ & $0.215$ & $28.06$ & $49.32$\\
+$0.680$ & $6.37$ & $0.407$ & $7.10$ & $13.87$\\
+$0.699$ & $0.18$ & $2.936$ & $0.00$ & $3.12$\\
+$0.720$ & $4.32$ & $8.628$ & $10.22$ & $23.18$\\
+$0.740$ & $21.78$ & $17.140$ & $42.04$ & $80.96$\\
+$0.760$ & $56.00$ & $28.962$ & $101.20$ & $186.16$\\
+$0.780$ & $111.71$ & $44.426$ & $195.29$ & $351.43$\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{fig3_anchor_profile}
+\caption{Anchor profile at $\theta=6.1\deg$ under the adopted $\lambda=0$ CMB protocol. (a)~Per-probe and joint $\Dchi$ against $\OL$ (symmetric-logarithmic axis): BAO and CMB share a minimum at $\OL=0.699$, SNe prefer $\OL\simeq0.668$. (b)~Zoom on the joint profile with the $\Dchi=1$ and $\Dchi=3.84$ profile-curvature bands $[0.692,0.703]$ and $[0.687,0.708]$ about the vertex $\OL^*=0.6976$; the adopted benchmark $\OL=0.699$ is marked. Generated by \code{src/make\_figures.py} from \code{results/anchor\_scan.json}.}\label{fig:anchorprofile}
+\end{figure}
+
+\subsubsection{The \texorpdfstring{$\theta$}{theta} profile and the flat region}\label{sec:thetaprofile}
+The per-$\theta$ profile of the joint $\Dchi$, with $\OL$ minimised continuously at each $\theta$ under the adopted $\lambda=0$ CMB protocol (\cref{tab:thetaprofile}, \cref{fig:anchorplane}), shows that the scanned surface carries no narrow minimum at the benchmark. The profile falls from the GR side ($\Dchi=3.91$ at $\theta=0.5\deg$) to a broad minimum of $2.98$ near $\theta=5\deg$ ($\OL^*=0.6951$), passes $3.04$ at the profiled anchor at the benchmark angle ($6.1\deg$, $0.6976$; $0.06$ above the minimum), and gives $3.115$ at the adopted benchmark ($6.1\deg$, $0.699$; $0.14$ above the minimum). The GR-side floor lies about $0.9$ in $\Dchi$ above the minimum: $\theta=0$ sits inside the $\Dchi=1$ band of this descriptive profile, and the mixing angle is weakly constrained within it. The GR-side floor of $3.91$ also shows that inter-probe tension persists in the GR limit; the floor is not a unique failure of the quartic closure. The surface is flat from $0$ to $6\deg$, and the benchmark sits inside the flat region rather than at a distinguished point. The valley of the dark degeneracy is visible in the drift of $\OL^*(\theta)$; the joint penalty at larger angles remains substantial ($114.64$ at $18.3\deg$, $435.72$ at $25\deg$, $945.14$ at $30\deg$).
+
+\begin{table}[t]
+\centering\small
+\caption{Per-$\theta$ profile minima of the summed per-probe $\Dchi$ over $\OL$ under the adopted $\lambda=0$ CMB protocol ($\OL$ minimised continuously at each $\theta$; the scan is extended to $\theta=0.5\deg$, where the GR limit is approached). The $6.1\deg$ row is the profiled anchor at the benchmark angle, not the adopted benchmark $\OL=0.699$.}\label{tab:thetaprofile}
+\begin{tabular}{@{}rrl@{}}
+\toprule
+$\theta\ [\deg]$ & min joint $\Dchi$ & $\OL$ at minimum\\
+\midrule
+$4.0$ & $3.15$ & $0.6933$\\
+$5.0$ & $2.98$ & $0.6951$ (profile minimum)\\
+$6.1$ & $3.04$ & $0.6976$ (profiled anchor at benchmark angle; $+0.06$ from the minimum)\\
+$8.0$ & $4.41$ & $0.7030$\\
+$12.2$ & $19.89$ & $0.7197$\\
+$18.3$ & $114.64$ & $0.7540$\\
+$25.0$ & $435.72$ & $0.8014$\\
+$30.0$ & $945.14$ & $0.8378$\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{fig4_anchor_plane}
+\caption{The summed per-probe $(\theta,\OL)$ plane under the adopted $\lambda=0$ CMB protocol. (a)~Joint $\Dchi$ against $\OL$ at several angles: the valley of the dark degeneracy drifts to larger $\OL$ with $\theta$. (b)~$\theta$ profile of the joint $\Dchi$ minimised over $\OL$ (logarithmic axis): broad minimum near $5\deg$; the profiled anchor at the benchmark angle is $0.06$ above it, the adopted benchmark is $0.14$ above it, and the GR-side floor is $\simeq0.9$ above. (c)~Zoom on $0\le\theta\le10\deg$, where the surface is flat. Generated by \code{src/make\_figures.py} from \code{results/anchor\_scan.json}.}\label{fig:anchorplane}
+\end{figure}
+
+At the tabulated per-$\theta$ minima the decomposition shows who drives the drift: at $(12.2\deg,0.7197)$ the joint $19.89$ splits as BAO $4.17$ / SNe $8.53$ / CMB $7.20$; at $(30\deg,0.8378)$ the joint $945.14$ splits as BAO $463.7$ / SNe $113.4$ / CMB $368.0$. The upward drift of the valley is paid jointly by the geometric and CMB blocks, BAO being the largest single contributor at $30\deg$, with SNe subdominant.
+
+Finally, the scalar sector at the tabulated anchor points is unchanged in kind at the adopted $\mFP/H_0=25$: the instability boundary moves only from $z_*=7.86$ to $9.05$ and the formal growth exponent from $\log_{10}\Gamma=87.8$ to $102.8$ (at $k=0.05\ \mathrm{Mpc}^{-1}$, $h=0.7$). Every tabulated point of this scanned anchor set is scalar-unstable within the adopted diagnostic (\cref{tab:scalar-theta}).
+
+\begin{table}[t]
+\centering\small
+\caption{Scalar-sector diagnostic at selected anchor-profile points. The first four rows are supplementary fixed-anchor points at $\OL=0.699$ (the row $6.0\deg$ lies near the profile minimum); the CMB-driven minima beyond $8\deg$ carry their own $\OL$ from \cref{tab:thetaprofile}. All rows use $\mFP/H_0=25$, self-consistent closure and the formal linear/WKB diagnostic.}\label{tab:scalar-theta}
+\begin{tabular}{@{}rrrrr@{}}
+\toprule
+$\theta\ [\deg]$ & $\OL$ & $z_*$ & $I_1$ & $\log_{10}\Gamma$ ($k=0.05$, $h=0.7$)\\
+\midrule
+$4.0$ & $0.699$ & $7.89381$ & $0.945598$ & $87.94$\\
+$6.0$ & $0.699$ & $7.87805$ & $0.944912$ & $87.88$\\
+$6.1$ & $0.699$ & $7.87710$ & $0.944871$ & $87.87$\\
+$8.0$ & $0.699$ & $7.85598$ & $0.943948$ & $87.79$\\
+$12.2$ & $0.7197$ & $7.99912$ & $0.961902$ & $89.46$\\
+$18.3$ & $0.7540$ & $8.23957$ & $0.994422$ & $92.48$\\
+$25.0$ & $0.8014$ & $8.65357$ & $1.050290$ & $97.68$\\
+$30.0$ & $0.8378$ & $9.05237$ & $1.105449$ & $102.81$\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection[Omega m and H0 in the light of the anchor profile]{\texorpdfstring{$\Om$}{Omega_m} and \texorpdfstring{$H_0$}{H0} in the light of the anchor profile}\label{sec:Om-H0}
+The anchor-implied $\Om=0.304$ (effective density $\cos^2\!\theta\,\Om=0.3009$) sits below independent measurements: Planck~2018 gives $\Om=0.315$ \citep{Planck2018}, and the Pantheon+ full-covariance $z_{\rm HD}$ best fit gives $0.331$. The anchor profile upgrades the status of this tension: it is not an artefact of a poorly chosen anchor, because BAO and the CMB fix the anchor near the benchmark while SNe pull it downwards (\cref{sec:anchor1d}). Within the scanned $(\theta,\OL)$ plane the residual floor is $\Dchi=2.98$ at the global profile minimum ($5\deg$, $0.6951$), $3.046$ at the refined $6.1\deg$ vertex ($0.6976$), and $3.115$ at the adopted benchmark ($0.699$); SNe~Ia dominate the adopted-benchmark floor. The GR-side floor $3.91$ shows that this is inter-probe tension, not a unique failure of the quartic closure. The restricted $(\alpha,\beta)$ rigidity result ($|\partial\Om/\partial\alpha|\sim4\times10^{-9}$, $|\partial\Om/\partial\beta|\sim10^{-12}$; \cref{tab:A1b}) then closes the argument within the scanned family: within the scanned domain, no common anchor eliminates the descriptive per-probe penalty floor: shifting $\OL$ towards the Pantheon+ preference substantially worsens BAO and CMB. The potential parameters and mixing angle do not remove this tension in the scans performed. A global claim over the full bimetric parameter space is not established, and a full exploration of the remaining dimensions remains necessary.
+
+The self-consistent $\Om=0.304$ differs from both the Planck value ($0.315$) and the DESI BAO best fit ($0.297$). This is not a discrepancy but a closure: the quartic constraint determines $\Om$ from the bimetric parameters, not from data. $H_0=68.84\ \mathrm{km\,s^{-1}\,Mpc^{-1}}$ follows from the BAO distance fit with $f=29.607$ and the Planck sound horizon $r_d=147.09$~Mpc (a GR-calibrated $r_d$; a self-consistent bimetric sound horizon is not computed here), consistent with H\&M ($69.0\pm0.4$) and with the compressed-CMB fit of \cref{sec:cmbres} ($h_*=0.6869$). The bimetric model does not claim to resolve the Hubble tension in this analysis.
+
+\subsection{Information-criterion note}
+No BIC preference is claimed. A literal calculation gives $-2.39$ when the fixed bimetric point is assigned one fewer parameter than the \LCDM{} reference, and $+7.87$ when all four bimetric parameters are counted as free. These numbers illustrate why the parameter count determines the answer, rather than providing evidence for either model. The adopted benchmark was informed by prior analyses, some bimetric directions are unidentifiable, and the usual BIC asymptotics are not established here. Accordingly, we do not use BIC as a model-selection tool in this work.
+
+\subsection{Limitations}\label{sec:limits}
+\begin{enumerate}
+\item \textbf{Restricted per-probe scope.} BAO blindness is statistical indistinguishability to $(\alpha,\beta,\mFP,\theta)$ at the adopted fixed anchor and across the reported fixed-anchor grids, under the stated covariance and profiling conventions. It does not extend across the anchor plane: at $\theta=6.1\deg$, BAO $\Dchi=100.57$ at $\OL=0.600$ and $111.71$ at $0.780$. It is not a theorem for the entire bimetric theory or for future data.
+\item \textbf{Profiling is not marginalisation.} The scales $f$ and $M$, the CMB parameters $(h,\omega_b)$ and the anchor $\OL$ are profiled by minimisation. No evidence or Bayes factor is calculated.
+\item \textbf{Heterogeneous references.} The combined $\Dchi=3.115$ of \cref{sec:combined} sums per-probe excesses over three different \LCDM{} references (BAO: profiled $f$ and $\Om$; SNe: profiled $M$ and $\Om$; CMB: three free parameters); it is descriptive arithmetic under the stated references, not a joint likelihood.
+\item \textbf{GR-calibrated compressed CMB.} The compressed likelihood supplies a conditional geometric background diagnostic, not a full bimetric Boltzmann, ISW, lensing or perturbation test. The physical error of this transfer is unknown.
+\item \textbf{Baseline scalar instability.} The gradient-instability and growth statements apply to the adopted finite branch, benchmark parameters and linear/WKB diagnostic; $87.7\%$ of the formal growth integral accumulates in the screened regime for the adopted order-of-magnitude $z_V=11.72$, and the quoted $\log_{10}\Gamma_u=10.8$ is conditional on the same $z_V$. The full-window no-scale statement is a diagnostic consistency result for the illustrative $\Gamma\le10$ cut, not a physical exclusion; horizon entry alone is not a large WKB margin, and ordinary WKB is non-uniform at $z_*$. The self-similar law is restricted to $\varepsilon\ll1$, $\rho\ll1$; the critical-mass window is quoted from the full model.
+\item \textbf{Conditional forecasts.} Future-survey, late-ISW, $S_8$ and $H_0$ statements are possibilities or background extrapolations, not certified predictions.
+\item \textbf{Non-distance bounds on $\theta$.} Constraints on the mixing angle from non-distance observables exist and are mass dependent (e.g.\ big bang nucleosynthesis, \citealp{Hogas2021b}); they lie outside the per-probe scope of this work, which characterises distance-probe blindness and sensitivity only.
+\item \textbf{Dataset dependence.} The SNe conclusions are quoted for the Pantheon+ compilation; other compilations (e.g.\ DES-Y5, Union3) may shift the preferred $\Om$ and hence the quoted mismatch.
+\end{enumerate}
