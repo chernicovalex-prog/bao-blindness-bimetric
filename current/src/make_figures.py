@@ -96,7 +96,7 @@ def fig1_background():
     a.set_ylim(0.38, 1.02)
     a.text(zV - 0.25, 0.97, r"$z_V$", color=INK2, ha="right", va="top")
     a.text(z0 - 0.25, 0.97, r"$z_0$", color=INK2, ha="right", va="top")
-    a.text(0.4, 0.45, r"de Sitter attractor: $y	o1$ as $z	o-1$", color=INK2, ha="left")
+    a.text(0.4, 0.45, r"de Sitter attractor: $y\to1$ as $z\to-1$", color=INK2, ha="left")
     panel_label(a, "(a)", x=-0.02, y=1.10)
     # (b) Omega_DE(z)
     b.plot(zz, ode, color=ORANGE)
