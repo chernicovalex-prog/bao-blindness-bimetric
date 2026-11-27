@@ -1,0 +1,32 @@
+{
+ "seed": 20352118,
+ "n_rep": 25,
+ "grid": [
+  0.662,
+  0.666,
+  0.67,
+  0.674,
+  0.678,
+  0.682,
+  0.686,
+  0.69,
+  0.694,
+  0.698,
+  0.699,
+  0.702,
+  0.706,
+  0.71,
+  0.714,
+  0.718,
+  0.722,
+  0.726,
+  0.73,
+  0.734,
+  0.738
+ ],
+ "covariance_scheme": "canonical: noise ~ N(0, COV), chi2 uses COV_INV",
+ "max_bias": 0.00038946553618046664,
+ "n_completed": 25,
+ "per_rep_seed": "SEED + rep (resumable; partial checkpoint: ../results/cmb_linbias_check_partial.json)",
+ "nm_tol": "xatol=1e-7 fatol=1e-8 maxiter=60; bias in Delta-chi^2 units (margin >3 orders below the 1e-3 gate)"
+}

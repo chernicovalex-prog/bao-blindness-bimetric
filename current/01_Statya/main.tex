@@ -1,0 +1,73 @@
+\documentclass[11pt]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[a4paper,margin=1.15in]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{bm}
+\usepackage{booktabs,array,tabularx,multirow}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage[authoryear,round]{natbib}
+\usepackage{enumitem}
+\usepackage{microtype}
+\usepackage{caption}
+\usepackage[table]{xcolor}
+\usepackage[colorlinks=true,linkcolor=blue!50!black,citecolor=blue!50!black,urlcolor=blue!50!black]{hyperref}
+\usepackage[capitalise,noabbrev]{cleveref}
+
+\captionsetup{font=small,labelfont=bf,labelsep=period}
+\setlist{itemsep=2pt,topsep=3pt}
+\setlength{\parskip}{3pt}
+\renewcommand{\arraystretch}{1.12}
+\graphicspath{{figures/}}
+
+% ---------- notation ----------
+\newcommand{\Om}{\Omega_{\mathrm m}}
+\newcommand{\OL}{\Omega_{\Lambda}}
+\newcommand{\Orad}{\Omega_{r}}
+\newcommand{\ODE}{\Omega_{\mathrm{DE}}}
+\newcommand{\mFP}{m_{\mathrm{FP}}}
+\newcommand{\LCDM}{$\Lambda$CDM}
+\newcommand{\Dchi}{\Delta\chi^2}
+\newcommand{\dd}{\mathrm{d}}
+\renewcommand{\deg}{^{\circ}}
+\newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\HM}{H\&M}
+\DeclareMathOperator{\sgn}{sgn}
+\Crefname{table}{Table}{Tables}
+\crefname{table}{Table}{Tables}
+\Crefname{figure}{Fig.}{Figs.}
+\crefname{figure}{Fig.}{Figs.}
+\crefname{section}{Sec.}{Secs.}
+\Crefname{section}{Sec.}{Secs.}
+\crefname{appendix}{Appendix}{Appendices}
+\Crefname{appendix}{Appendix}{Appendices}
+\crefname{equation}{Eq.}{Eqs.}
+\Crefname{equation}{Eq.}{Eqs.}
+
+\title{The H\&M Anchor, Decomposed:\\[2pt]
+A Per-Probe Analysis of the Bimetric Cosmological Benchmark}
+\author{Aleksandr Chernikov\\[2pt]\small Independent researcher}
+\date{\small November 2026}
+
+\begin{document}
+\maketitle
+
+\input{sections/abstract}
+\input{sections/s1_intro}
+\input{sections/s2_theory}
+\input{sections/s3_bao}
+\input{sections/s4_sne}
+\input{sections/s5_cmb}
+\input{sections/s6_scalar}
+\input{sections/s7_discussion}
+\input{sections/s8_conclusions}
+
+\input{sections/back}
+
+\input{sections/appendices}
+
+\bibliographystyle{abbrvnat}
+\bibliography{refs}
+\end{document}

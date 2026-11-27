@@ -1,0 +1,162 @@
+\section{The scalar sector: \texorpdfstring{$X(z)$, $z_*$}{X(z), z*} and the growth factor \texorpdfstring{$\Gamma$}{Gamma}}\label{sec:scalar}
+
+\paragraph{Conventions.}
+Early evidence for classical instabilities of cosmological Hassan--Rosen backgrounds was given by \citet{Kuhnel2013}, using a zero-mode/off-diagonal stability analysis with $\beta_3=0$. The sub-horizon scalar eigenfrequencies used here instead follow the later finite-branch perturbation formalism \citep{Konnig2014,Akrami2015}; the two analyses should not be identified. Perturbations scale as $\Phi\sim e^{i\omega N}$ with $N=\ln a$ \citep[][Eq.~37]{Akrami2015}; the mode is unstable when $X<0$; the growth integral is evaluated in the canonical $1/E$ convention. The scalar sector is evaluated at the self-consistent $z=0$ closure ($\Om=0.30435$).
+
+\subsection{\texorpdfstring{$X(z)$}{X(z)} and the instability boundary}\label{sec:Xz}
+Background-level viability is necessary but not sufficient: the model must also be free of ghost and gradient instabilities. We evaluate $X(z)=(aH/k)^2\omega^2$, the dimensionless squared eigenfrequency of the scalar mode ($X<0$ if and only if $\omega^2<0$, i.e.\ a gradient instability), in the sub-horizon WKB limit using Eq.~38 of \citet{Akrami2015} (the eigenfrequencies were first given by \citealp{Konnig2014}). The mapping between the H\&M and Akrami conventions follows from the rescaling symmetry of the bimetric action: $\alpha_A^2=\tan^2\theta$, with the Akrami-gauge mass $m_A^2=\mFP^2\sin^2\theta=7.0575$ fixed by the consistency condition $m^2\beta_n^{(A)}=B_n$ for $n=1,2,3$.
+
+At the benchmark the evaluation gives
+\begin{equation}
+X(0)=+0.999996,\quad X(5)=+0.839634,\quad X(10)=-0.466223,\quad X(1090)=-1.163701
+\end{equation}
+(self-consistent closure; the rounded $\Om=0.304$ convention gives $0.839993$, $-0.465722$, $-1.163845$ at $z=5,10,1090$). $X>0$ throughout the observable late universe and crosses to $X<0$ at the boundary $z_*=7.8771$, where $H(z_*)=14.5573\,H_0$ (\cref{fig:scalar}a). The adopted growth window begins at $z_*$ and ends at recombination; $X<0$ persists at higher redshift, and the additional early tail is quantified below. The growing regime does not extend to the present.
+
+Three distinct redshifts must not be confused: the perturbative root $z_*=7.8771$; the background zero of $\ODE(z)$ at $z_0=4.882$, where the background Higuchi sensor changes sign; and the Vainshtein screening boundary $z_V=11.72$, defined by $H(z_V)=\mFP$ at $\mFP/H_0=25$ (an order-of-magnitude criterion, following \citealp{Luben2020}). At the benchmark they are ordered $z_0<z_*<z_V$ and are conceptually independent.
+
+This localisation is quantitatively consistent with the finite-branch behaviour found by \citet{Akrami2015} and with the no-go analysis of \citet{Konnig2015}, who showed that every finite branch carries an epoch of gradient instability or of Higuchi ghosts. Our result locates the boundary for the full ($B_n\neq0$) model at the benchmark point. Following Akrami et al., the viable corner of their parameter space has $\alpha_A\ll1$ with $H(z_*)$ of order $H_\Lambda/\alpha_A$. Numerically, the benchmark has $1/\tan\theta=9.4$ and $H(z_*)=14.6\,H_0$, while $H_\Lambda/\alpha_A\sim7.8\,H_0$. This is only a scale comparison, not membership in their viable corner: the benchmark crossing remains at $z_*=7.88$, whereas a phenomenologically safe configuration must move the unstable epoch to much earlier times. The reference mass map below quantifies that separate requirement. Their Eqs.~(40)--(42) in fact contain the constant ratio $H_*/\mFP$ implicitly (in their limit $\mFP$ is proportional to $m/\alpha$); what is new in \cref{sec:selfsim} is the explicit set of branch constants $c=0.582199$ and $\kappa=0.374329$, the $\Lambda$ correction, and the scaling law at fixed $\theta$ with a measured slope. The boundary lies at $z\sim8$, after recombination and outside the direct redshift coverage of BAO and SNe (though still integrated through by the CMB), rather than being pushed to the unobservable early universe.
+
+\paragraph{Caveat.}
+The linearised equations remain applicable at the onset $X=0$ and diagnose the growing mode; linear theory loses validity only if sufficient accumulated growth drives perturbations beyond the linear regime. The statements above locate the boundary and evaluate a formal growth diagnostic; they do not evolve perturbations to that nonlinear stage. Nonlinear evolution of a homogeneous spherical overdensity in this theory remains stable \citep{Hogas2020stab}, so the instability may be bounded by nonlinearities, but cosmological saturation is undecided. Observational propagation would require a Boltzmann-level treatment, while establishing nonlinear saturation would require a nonlinear calculation; partial calculations (tensor modes, spherical collapse) do not decide the cosmological case.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{fig6_scalar_sector}
+\caption{Scalar sector at the benchmark. (a)~Eigenfrequency $X(z)$ with the boundary $z_*=7.877$, the zero crossing $z_0=4.882$ of $\ODE$ and the Vainshtein boundary $z_V=11.72$ marked. (b)~Cumulative share of the growth integral $I_1$: $12.3\%$ is accumulated in the unscreened window $z_*<z<z_V$, $87.7\%$ at $z>z_V$. (c)~The scale dilemma: formal linear/WKB growth exponent $\log_{10}\Gamma(k)$ against the horizon-entry redshift $z_h(k)$ (\cref{tab:dilemma}). Generated by \code{src/make\_figures.py} from \code{src/scalarsec.py} and \code{results/scalar\_k\_map.json}.}\label{fig:scalar}
+\end{figure}
+
+\subsection{The growth integral}\label{sec:growth}
+Growth of the unstable mode is quantified by the accumulated exponent
+\begin{equation}
+\ln\Gamma(k)=\frac{k}{H_0}\,I_1,\qquad I_1=\int_{z_*}^{1090}\frac{\sqrt{|X(z)|}}{E(z)}\,\dd z .
+\end{equation}
+At the self-consistent closure $I_1=0.944870550$. The decomposition by the screening boundary is informative: $87.7\%$ of $I_1$ is accumulated at $z>z_V$, where screening may affect the linear evolution but is not modelled here, and only $12.3\%$ in the unscreened window $z_*<z<z_V$ (\cref{fig:scalar}b). This fraction is nearly independent of $\mFP$: a dedicated scan ($\mFP/H_0$ from $1.5$ to $200$, 12 points; \code{results/scalar\_mfp\_scan.json}) finds the unscreened share moving only from $9.7\%$ to $13.9\%$, with the benchmark's $12.3\%$ mid-range.
+
+The two boundaries scale together asymptotically: $z_*$ descends from the benchmark value to $z\sim0.06$ at $\mFP/H_0=1.5$ (the unstable epoch widens towards the present at low mass rather than closing; the screening boundary stays at $z\sim1$ there, so the two are far apart below $\mFP/H_0\sim10$) and rises to $z\sim34$ at $\mFP/H_0=200$, scaling with $z_V$ at large mass. Over the same range $I_1$ falls from $2.50$ at $\mFP/H_0=1.5$ through the benchmark $0.9449$ to $0.42$ at $\mFP/H_0=200$.
+
+The quoted $87.7\%$ holds at $\mFP/H_0=25$ and is conditional on the adopted order-of-magnitude $z_V$.
+
+The $\Gamma$ values of \cref{tab:growth} are therefore formal linear/WKB growth numbers, not physical growth estimates. The table is pure arithmetic on the single value $I_1=0.944870550$ with $H_0(h)=100h/299\,792.458\ \mathrm{Mpc}^{-1}$ (both $h$ blocks use the same $I_1$; every entry is regenerated by \code{src/checks.py}).
+
+\begin{table}[t]
+\centering\small
+\caption{Formal growth exponent $\log_{10}\Gamma(k)=(k/H_0)\,I_1/\ln10$ with $I_1=0.944870550$ (benchmark closure, $N_{\rm eff}$ radiation).}\label{tab:growth}
+\begin{tabular}{@{}lcccccc@{}}
+\toprule
+$k\ [\mathrm{Mpc}^{-1}]$ & $0.001$ & $0.002$ & $0.003$ & $0.01$ & $0.05$ & $0.10$ \\
+\midrule
+$h=0.700$ & $1.76$ & $3.51$ & $5.27$ & $17.57$ & $87.87$ & $175.74$ \\
+$h=0.678$ & $1.81$ & $3.63$ & $5.44$ & $18.14$ & $90.72$ & $181.45$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Two remarks bound how much weight these formal numbers can bear, and both are quantified rather than asserted.
+\emph{First, the integration limit.} The tail of $I_1$ beyond $z=1090$ (integrated to infinity, with the radiation-era remainder added analytically) adds $0.0734$ ($7.8\%$ of $I_1$), moving $\log_{10}\Gamma$ at $k=0.05\ \mathrm{Mpc}^{-1}$ and $h=0.700$ from $87.87$ to $94.70$: immaterial to any conclusion drawn here.
+
+\emph{Second, the scale.} The exponent is exact in $k$ within the formal integral, but the sub-horizon WKB assumption $k\gg aH$ is scale dependent. Horizon entry before recombination requires $k\ge k_{\rm rec}=aH(z_{\rm rec})=4.90\times10^{-3}\ \mathrm{Mpc}^{-1}$, at which $\log_{10}\Gamma=8.61$. This is only horizon entry, not a large WKB margin: an illustrative $k/(aH)\ge10$ throughout the window requires $k\ge10k_{\rm rec}=4.90\times10^{-2}\ \mathrm{Mpc}^{-1}$. The illustrative low-growth cut $\Gamma\le10$ requires $k\le5.69\times10^{-4}\ \mathrm{Mpc}^{-1}$; such a mode has $z_h=18.5$ and is super-horizon through most of the window. Hence no scale simultaneously satisfies this low-growth cut and is applicable to the full-window horizon/WKB diagnostic. This is a diagnostic consistency statement, not a physical exclusion: low-$k$ modes are not irrelevant, but their evolution lies outside the adopted calculation. Ordinary WKB is also non-uniform near the turning point $X(z_*)=0$. The quoted $k=0.001$--$0.1\ \mathrm{Mpc}^{-1}$ values remain formal diagnostic numbers.
+
+\begin{table}[t]
+\centering\small
+\caption{The scale dilemma of the scalar-sector diagnostic: horizon-entry redshift $z_h(k)$ at which $k=aH=H_0E(z)/(1+z)$ (full background $E(z)$) against $\log_{10}\Gamma(k)=(k/H_0)I_1/\ln10$ with $I_1=0.944870550$ and $h=0.7$. The boundary $z_*=7.8771$ is $k$-independent; $\Gamma$ is exact in $k$. The equilibrium anchor sits at $k_{\rm eq}=aH(z_{\rm eq})=0.0106\ \mathrm{Mpc}^{-1}$ for $z_{\rm eq}=3351$. Values from \code{src/scalarsec.py} (\code{results/scalar\_k\_map.json}); $k=aH$ is verified at each row. Horizon entry alone is not a large WKB margin, and ordinary WKB is non-uniform at $X(z_*)=0$.}\label{tab:dilemma}
+\begin{tabularx}{\textwidth}{@{}rrrX@{}}
+\toprule
+$k\ [\mathrm{Mpc}^{-1}]$ & $z_h$ & $\log_{10}\Gamma$ & Regime\\
+\midrule
+$0.001$ & $58.2$ & $1.76$ & moderate formal growth ($\Gamma\sim57$, above the illustrative $\Gamma\le10$ cut); super-horizon for $60.55\%$ of the window in $\ln(1+z)$ (sub-horizon $39.45\%$)\\
+$0.05$ & $20\,858$ & $87.87$ & quoted benchmark scale; sub-horizon through the window\\
+$0.1$ & $43\,300$ & $175.74$ & sub-horizon through the window\\
+$0.5$ & $2.23\times10^{5}$ & $878.72$ & sub-horizon through the window\\
+$1.0$ & $4.48\times10^{5}$ & $1757.44$ & sub-horizon through the window\\
+$5.0$ & $2.25\times10^{6}$ & $8787.18$ & sub-horizon far beyond $z_{\rm rec}$\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Baseline linear-sector diagnostic}
+At the benchmark, the formal exponent $\log_{10}\Gamma=87.87$ at $k=0.05\ \mathrm{Mpc}^{-1}$ and $h=0.700$ shows that the adopted linear/WKB description is self-invalidating: if the formal growing solution is followed, linear perturbation theory fails long before the endpoint of the unstable window. This is not a literal prediction of amplification by $10^{87.9}$ or a physical exclusion of the benchmark; it is the finite-branch gradient instability behaving as the literature predicts, with a precisely quantified formal diagnostic.
+
+On the largest scales the accumulated growth falls linearly with $k$: at $k=0.0012$--$0.0023\ \mathrm{Mpc}^{-1}$, $\Gamma$ falls to the $10^2$--$10^4$ range, orders of magnitude below the sub-horizon value; these remain formal diagnostic factors, not physical amplitudes.
+
+For contrast, the late-time de~Sitter form of the static Higuchi bound, $\mFP^2>2\OL$ (in units of $H_0^2$), is satisfied at the benchmark ($625$ against $1.4$), consistently with the algebraic ghost-free certificate of \cref{sec:selfsim}. The identified pathology on this branch is specifically the scalar gradient instability.
+
+\subsection{Self-similar structure of the instability boundary}\label{sec:selfsim}
+The $\mFP$ scan of \cref{sec:growth} shows that the boundary tracks the screening scale rather than closing at low mass. This behaviour is not a numerical accident: in the appropriate variable the boundary is mass-independent, and its location obeys a two-term law. We restrict attention to the benchmark specialization, with exact algebraic/root certificates where stated and 17 dedicated numerical cross-checks; arbitrary interaction parameters are not claimed. Define
+\begin{equation}
+u(z)=\frac{\Om(1+z)^3}{\sin^2\!\theta\,\mFP^2},\qquad
+\varepsilon=\frac{\OL}{\sin^2\!\theta\,\mFP^2},\qquad
+\rho(z)=\frac{\Orad(1+z)}{\Om}.
+\end{equation}
+Dividing the quartic for $y(z)$ by $\sin^2\!\theta\,\mFP^2$ (the coefficient list and the lemma-level statements are given in \cref{app:selfsim}) shows that $u$ enters only through $w\equiv tu=\Om(1+z)^3/(\mFP^2\cos^2\theta)$ with $t=\tan^2\theta$; three exact properties follow: the $\varepsilon$-dependence of the reduced polynomial is linear with no $O(\varepsilon^2)$ remainder; the finite-branch root $y(u)$, its derivative $\dd y/\dd N=9tuy/(\partial_yP)$, and the scalar frequency $X(u)$ built from them are universal functions of $(u,\varepsilon,\rho)$; and at $\varepsilon=0$ the positive-to-negative zero $u_*$ of the universal $X(u)$ exists and is unique on the benchmark branch. The uniqueness chain combines the positive denominator of $X(y)$, exactly one Sturm root of $Q(y)$, the one-to-one branch map $y\leftrightarrow u$ (with $\dd y/\dd N\ge0$, strictly positive on the open branch), and the endpoint signs $X>0$ as $u\to0$ and $X\to-1$ as $u\to\infty$; numerical monotonicity is only a cross-check (\cref{app:selfsim}, Lemmas~1--2).
+
+The resulting structure, verified against the full pipeline (\code{src/selfsim.py}; 17 dedicated checks), is the following (\cref{fig:selfsim}).
+\begin{enumerate}
+\item \textbf{Branch constants.} At $\varepsilon=0$ on the benchmark branch $(\alpha,\beta)=(0,3)$, $\theta=6.1\deg$: $u_*=30.337301$, $y_*=0.705465$ and, with $G(\delta)=\delta(1+\alpha\delta+\beta\delta^2/3)$, $\delta_*=1-y_*=0.294535$,
+\begin{equation}
+c^2=\sin^2\!\theta\,[u_*-G(\delta_*)],\qquad
+\kappa=1+\frac{\dd}{\dd\varepsilon}\bigl[u_*(\varepsilon)-G(\delta_*(\varepsilon))\bigr]_{\varepsilon=0}.
+\end{equation}
+Numerically $c=0.582199$ and $\kappa=0.374329$, with $\kappa=1+(-0.626809)+0.001138$: the boundary shift $\dd u_*/\dd\varepsilon=-0.626809$ dominates the $\varepsilon$ correction. The full model at $\mFP/H_0=2000$ ($\Orad=0$) agrees to $10^{-5}$ in $u_*$ and to $5\times10^{-8}$ in the plateau ratio below.
+\item \textbf{Mass scaling.} $1+z_*=(u_*\sin^2\!\theta\,\mFP^2/\Om)^{1/3}\,[1+O(\varepsilon,\rho)]$: the boundary moves as $\mFP^{2/3}$. The measured slope on $\mFP/H_0=10$--$200$ is $0.6665$ (scan of \cref{sec:growth}), against $2/3$ (the reduced problem independently gives $0.6669\pm0.0025$, App.~D).
+\item \textbf{The law for $H$.} Substitution of $u_*(\varepsilon)$ into the Friedmann equation ($H_0=1$) gives
+\begin{equation}
+H^2(z_*)=c^2\mFP^2+\kappa\,\OL+R,\label{eq:Hlaw}
+\end{equation}
+with $R$ of order $\OL^2/(\sin^2\!\theta\,\mFP^2)$ absolutely ($\varepsilon^2$ relative). The plateau $r=H(z_*)/\mFP$ is flat to $9\times10^{-7}$ on $\mFP/H_0=500$--$8000$ at $\Orad=0$, and at the benchmark ($\varepsilon=0.099$) the law reproduces the full $H(z_*)=14.5573\,H_0$ to $+0.046\%$. The value $1/\sqrt3=0.577350$ sometimes associated with such boundaries does not arise: $c$ differs from it by $0.84\%$.
+\end{enumerate}
+The three statements collapse into a single master equation: since the boundary condition is $u(z_*)=u_*(\varepsilon)$,
+\begin{equation}
+\Om(1+z_*)^3=\sin^2\!\theta\,\mFP^2\,u_*(\varepsilon)\,[1+O(\rho)],\qquad
+\varepsilon=\frac{\OL}{\sin^2\!\theta\,\mFP^2},\label{eq:master}
+\end{equation}
+with $u_*(\varepsilon)=30.337301-0.626809\,\varepsilon+O(\varepsilon^2)$; explicitly,
+\begin{equation}
+(1+z_*)^3=\frac{30.337301\,\sin^2\!\theta\,\mFP^2-0.626809\,\OL}{\Om}\,\bigl[1+O(\varepsilon^2,\rho)\bigr].\label{eq:master2}
+\end{equation}
+Scaling, $\Lambda$ correction and the $H$-law \eqref{eq:Hlaw} are one statement (\eqref{eq:Hlaw} follows from \eqref{eq:master} at the boundary). When the exact reduced $u_*(\varepsilon)$ is used, rather than its truncated linear approximation, the residual of the master form is purely radiative: it reproduces the full model to $0.13\%$ in $z_*$ at the benchmark and $0.49\%$ at $\mFP/H_0=200$, tracking $O(\rho(z_*))$ (verified); the truncated expansion additionally retains its stated $O(\varepsilon^2)$ error. The negative sign of the $\Lambda$ term lowers the boundary for larger $\OL$.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{fig7_selfsimilarity}
+\caption{Self-similar structure of the instability boundary. (a)~$X(z)$ for $\mFP/H_0=6$--$200$: the boundary moves with the mass. (b)~The same curves in the universal variable $u=\Om(1+z)^3/(\sin^2\!\theta\,\mFP^2)$ collapse onto one curve crossing zero at $u_*\simeq30.3$ (the residual spread is the radiative and $\varepsilon$ correction). (c)~$z_*(\mFP)$: full model (points), master equation \eqref{eq:master2} (line) and the fitted slope of $\ln(1+z_*)$ against $\ln\mFP$. (d)~$H(z_*)/\mFP$ approaches the branch constant $c=0.582199$ (dashed). Generated by \code{src/make\_figures.py} from \code{src/selfsim.py}.}\label{fig:selfsim}
+\end{figure}
+
+Two applications quantify what the scan of \cref{sec:growth} showed qualitatively.
+
+\emph{First, the benchmark branch is ghost-free.} On the finite branch the Higuchi bound takes the form $\dd y/\dd N\ge0$ \citep[Sec.~III\,A of][]{Konnig2015}. For the reduced $\varepsilon=0$ benchmark branch, the exact algebraic certificate of \cref{app:selfsim} proves $F_2>0$, $F_3>0$ and $F_4>0$ on $0<y<1$ for $t=\tan^2(6.1\deg)$; with $N_4=(1-y)F_4$ and $\dd y/\dd N=3yN_4/F_3$, this gives $\dd y/\dd N\ge0$ throughout that open algebraic branch. Independently, the full-model numerical scan gives $\dd y/\dd N(0)=1.46\times10^{-3}$ with a minimum of $5.1\times10^{-6}$ at $z=1090$, asymptotically marginal at high $z$ ($\dd y/\dd N\sim3y$). The reduced exact certificate and the full-model numerical evidence exclude the Higuchi ghost within their stated scopes; they do not imply $X\ge0$, nonlinear stability or full cosmological viability.
+
+\emph{Second, the reference mass map} (\cref{tab:mass}) shows how the boundary moves in a prescribed Planck-like reference background, rather than providing self-consistent physical bounds for the bimetric benchmark. The mass--redshift trend was reported numerically by \citet[][Sec.~6.3]{Hogas2022}; the explicit $3/2$ exponent used below follows from our self-similar reduction, rather than being quoted from that study. Within the prescribed background, keeping the gradient boundary beyond the DESI Lyman-$\alpha$ forest ($z_*=2.33$) requires $\mFP/H_0\gtrsim6$, beyond the forest edge ($z_*=4.2$) $\gtrsim11$, and leaving no gradient-unstable interval at $z<1090$ requires $\mFP/H_0\gtrsim4.1\times10^4$ ($5.9\times10^{-29}$~eV). These are conditional reference thresholds: $E^2(0)=1$ is not imposed, and no direct comparison with the benchmark $\mFP/H_0=25$ is made without a separate closure conversion. Direct graviton-mass limits (GWTC-3: $m_g\le2.42\times10^{-23}$~eV/$c^2$ at 90\% credibility \citep{GWTC3Tests}; Abell~1689: $1.37\times10^{-29}$~eV \citep{Desai2018}; X-COP: $(4.99$--$6.79)\times10^{-29}$~eV \citep{Piorkowska2022}) are all upper bounds: Abell~1689 lies below this number, X-COP straddles it; their application to $\mFP$ is model dependent, so they neither confirm nor exclude the range.
+
+\begin{table}[t]
+\centering\small
+\caption{Reference mass thresholds in a prescribed cosmology $\Om=0.315$, $\OL=0.685$ (not the quartic closure of the benchmark). These are conditional reference values, not self-consistent physical bounds on $m_{\rm FP}$. The scalar evaluation uses the nominal $H_0$ unit of this prescribed background; $E^2(0)=1$ is not imposed. The eV conversion uses $H_0=1.438\times10^{-33}$~eV ($h=0.674$), whereas the scalar sector itself is evaluated at $h=0.7$. Values are from \code{src/selfsim.py} and \code{src/extra\_numbers.py}. They are not directly comparable to the benchmark $\mFP/H_0=25$ without a separate closure conversion.}\label{tab:mass}
+\begin{tabularx}{\textwidth}{@{}Xrr@{}}
+\toprule
+Condition & $\mFP/H_0$ & $\mFP$ [eV]\\
+\midrule
+$X(0)=0$, lower edge (boundary enters the observed region) & $1.1196$ & $1.6\times10^{-33}$\\
+$X(0)=0$, upper edge & $1.4363$ & $2.1\times10^{-33}$\\
+minimum of $X(0)$ in the window & $-0.0760$ at $\mFP/H_0=1.291$ & ---\\
+$z_*=2.33$ (DESI Ly-$\alpha$ forest $z_{\rm eff}$) & $5.937$ & $8.5\times10^{-33}$\\
+$z_*=4.2$ (Ly-$\alpha$ forest edge) & $11.437$ & $1.6\times10^{-32}$\\
+$z_*=1090$ (recombination) & $41\,153$ ($34\,556$ without radiation) & $5.9\times10^{-29}$\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+The asymptotic H-law and first-order master expansion assume $\varepsilon\ll1$, $\rho\ll1$; the critical-mass window around $\mFP/H_0\sim1.2$--$1.5$ is outside their domain. Practical reduced-model tests extend to $\varepsilon\lesssim1$, while the approximate numerical linearity of $u_*(\varepsilon)$ survives to $\varepsilon\sim7$ ($0.20\%$ at $\varepsilon=6.88$). The latter observation does not enlarge the asymptotic validity domain of the H-law or master expansion. Since $\rho$ reaches $\sim0.3$ by recombination, $34\,556$ is $16\%$ below $41\,153$ (equivalently, $41\,153$ is $19\%$ above $34\,556$).
+
+The growth integral admits the exact scaling $I_1=(\sin^2\!\theta\,\mFP^2)^{-1/6}\,\Om^{-1/3}J(u_{\rm rec},\varepsilon)$ at $\varepsilon=\rho=0$: the scan range $I_1=2.50$--$0.42$ across $\mFP/H_0=1.5$--$200$ is this scaling in disguise ($I_1\mFP^{1/3}$ varies by only $15\%$, $2.87\to2.44$). The radiation-free tail beyond any $z$ is $2/\sqrt{\Om(1+z)}$ --- $0.1098$ at $z_{\rm rec}$, independent of $\mFP$ and $\theta$ --- while the full $N_{\rm eff}$-radiation tail is $0.0734$.
+\subsection{Viability tests}\label{sec:viability}
+Within the adopted linear/WKB diagnostic the baseline description is self-invalidating ($\log_{10}\Gamma=87.87$ at $k=0.05\ \mathrm{Mpc}^{-1}$, $h=0.700$), and the self-similar reduction shows that this is not a property of the chosen point: $u(z)$ grows without bound while $X(u)$ stays negative at arbitrarily large $u$ and tends to the analytic asymptote $-1$. The dominant balance $y\sim(1+2\alpha+\beta)/(3tu)$ gives $\dd y/\dd N=3y$, $T_1\to1$, $T_2\to3$, hence $X=1+T_1-T_2\to-1$ (verified at $u=10^8$ to $3.5\times10^{-6}$). For the benchmark finite branch, the reduced self-similar analysis gives a single boundary crossing. The reduced-problem asymptote $X\to-1$ at large $u$ suggests that this behaviour is generic, but we do not claim a theorem beyond the self-similar regime and the benchmark branch. Combined with \cref{tab:mass}, the scanned class is illustrated by selected limiting cases rather than a complete three-regime classification:
+\begin{enumerate}
+\item[(a)] the boundary lies in the observed window ($\mFP/H_0\lesssim6$, $z_*\lesssim2.4$), so the adopted diagnostic contains an instability there; observational exclusion is not computed here;
+\item[(b)] the fine-tuned low-mass window around the sign changes of $X(0)$ ($\mFP/H_0\sim1.12$--$1.44$, with the boundary at $z_*\lesssim0.06$ just above it) is disfavoured within the reported H\&M posterior at the stated $68\%$ level and in any case carries $X(0)<0$ over most of the window;
+\item[(c)] the broad intermediate range $6\lesssim\mFP/H_0\lesssim4.1\times10^4$, which includes the benchmark $\mFP/H_0=25$, places the unstable boundary between the directly observed late region and recombination;
+\item[(d)] $\mFP/H_0\gtrsim4.1\times10^4$, so that $z_*>1090$ and no gradient-unstable interval remains at $z<1090$.
+\end{enumerate}
+Regime (d) is the only corner of the scanned class with $z_*>1090$; the earlier interval $z>z_*$ remains gradient-unstable, with $X\to-1$ in the reduced early-time limit. This is not a certification of full stability or viability. It sits far above the mass scale of the H\&M analysis and approaches the large-mass GR embedding of the theory \citep{Hogas2021}. That asymptotic connection does not by itself prove that the finite lower-bound regime is observationally indistinguishable from \LCDM{}; the distinguishability of the finite regime is not decided here.
+
+The formal diagnostic is also informative under the strongest charitable reading of the screening caveat. For the adopted order-of-magnitude screening boundary $z_V=11.72$, the Vainshtein regime supplies $87.7\%$ of the formal growth integral, while the remaining $12.3\%$ is accumulated in the unscreened window $z_*<z<z_V$. Subject to the same horizon, WKB-margin and turning-point restrictions, this unscreened contribution alone corresponds to $\log_{10}\Gamma_u=10.8$ ($k=0.05\ \mathrm{Mpc}^{-1}$, $h=0.7$; $11.2$ at $h=0.678$), conditional on that adopted $z_V$. Discarding the screened contribution therefore does not remove the formal instability diagnostic, but still does not constitute a nonlinear evolution calculation.
+
+The formal linear/WKB diagnostic identifies an unstable interval but does not by itself establish nonlinear instability or observational exclusion. Possible routes out therefore require physics outside the adopted diagnostic: a nonlinear saturation mechanism (spherical analyses show that instabilities can be tamed by nonlinearities for parts of the parameter space, \citealp{Aoki2015,Hogas2020stab}, but whether the cosmological instability saturates for the benchmark is undecided) or parameters outside the scanned class. Neither is established here, and no stronger background-level statement is possible. All structure-formation statements (late-ISW, $S_8$, growth) therefore remain conditional background-level statements.

@@ -1,0 +1,87 @@
+{
+  "N": 2000,
+  "seed": 20261118,
+  "seeds": [
+    20261118
+  ],
+  "theta": 6.1,
+  "OL_true": 0.699,
+  "grid_mode": "fine",
+  "statistic_mode": "quadratic_vertex_plus_cubic_spline_at_true",
+  "covariance_scheme": "canonical: noise ~ N(0, C), chi2 uses C^{-1} (as in probes/*.py)",
+  "cmb_linbias_real": 0.0,
+  "OL_grid": [
+    0.662,
+    0.666,
+    0.67,
+    0.674,
+    0.678,
+    0.682,
+    0.686,
+    0.69,
+    0.694,
+    0.698,
+    0.699,
+    0.702,
+    0.706,
+    0.71,
+    0.714,
+    0.718,
+    0.722,
+    0.726,
+    0.73,
+    0.734,
+    0.738
+  ],
+  "grid_spacing": 0.004,
+  "coverage_dchi1": 0.683,
+  "coverage_dchi384": 0.9535,
+  "dchi_true_quantiles": {
+    "0.5": 0.4797,
+    "0.68": 0.9908,
+    "0.9": 2.6432,
+    "0.95": 3.6579
+  },
+  "argmin_mean": 0.69898,
+  "argmin_quantiles": {
+    "0.16": 0.6927,
+    "0.5": 0.6989,
+    "0.84": 0.7054
+  },
+  "exact_stream": true,
+  "segments": [
+    {
+      "tag": "exactF0",
+      "start": 0,
+      "end": 500
+    },
+    {
+      "tag": "exactF1",
+      "start": 500,
+      "end": 1000
+    },
+    {
+      "tag": "exactF2",
+      "start": 1000,
+      "end": 1500
+    },
+    {
+      "tag": "exactF3",
+      "start": 1500,
+      "end": 2000
+    }
+  ],
+  "merge_method": "concatenate per-realisation arrays in stream order; statistics computed once centrally",
+  "code_data_signature": {
+    "src/exact_stream_segment.py": "08c3f2b92f82d61ca609594d2b67c475aaf069fde0d8c1b2a724c44b4cfd6bc9",
+    "src/profile_calibration.py": "97320a120c682356ac82328da95f6f874d5175ecd77969ab3d570404bd52ecd7",
+    "src/core.py": "00cd9208ac8c70f54c0b931616f40b1d13f7ace80057e77e39650a8a53056b5e",
+    "src/probes/cmb.py": "64a3aa91f9c1e5cec490342fc869f385c215c22b8cfdfd3a43b3a0544ffdca29",
+    "src/probes/bao.py": "790ac9b4fe8b0efb61d715a4d6d4f03b9eab43a9f00c7191c92a273e3489075e",
+    "src/probes/sne.py": "4d94e59ede3460011fc7f50911dba16084b731ff2f6224f8f9e38d6fb4c23c5d",
+    "data/desi_gaussian_bao_ALL_GCcomb_mean.txt": "e181b1107474b2e262221ba8115c06bb4d3bc7f0dc6af704620c355d78aae106",
+    "data/desi_gaussian_bao_ALL_GCcomb_cov.txt": "252a143274c8a07c78694c119617d36594f6d7965d00319ca611c6ffb886e509",
+    "data/Pantheon+SH0ES.dat": "fae093350078bab9a23a25c8919367e46f4cad8d447e2d449f6dee66e1663cb4",
+    "data/Pantheon+SH0ES_STAT+SYS.cov": "abf806d966485e64afdb359c87bffc0ecc00d05eff0a31ced66f247385df0fdc"
+  }
+}

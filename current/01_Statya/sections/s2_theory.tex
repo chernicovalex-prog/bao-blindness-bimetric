@@ -1,0 +1,59 @@
+\section{Theoretical framework}\label{sec:theory}
+
+\subsection{Bimetric Friedmann equation}
+The bimetric Friedmann equation for the physical metric $g_{\mu\nu}$ takes the form
+\begin{equation}
+\begin{aligned}
+E^2(z)&=\Om(1+z)^3+\Orad(1+z)^4+\ODE(z),\\
+\ODE(z)&=\OL-\sin^2\!\theta\,\mFP^2\,(1-y)\Bigl[1+\alpha(1-y)+\tfrac{\beta}{3}(1-y)^2\Bigr],
+\end{aligned}
+\label{eq:friedmann}
+\end{equation}
+where $\theta$ is the mixing angle, $\mFP$ is the Fierz--Pauli mass in units of $H_0$, $\alpha$ and $\beta$ are potential parameters, and $\OL$ is the effective cosmological constant, treated as a free model parameter throughout and profiled in \cref{sec:anchor}. At the benchmark ($\alpha=0$, $\beta=3$, $\mFP/H_0=25$, $\theta=6.1\deg$) we use $\OL=0.699$. In the strict GR limit $\theta\to0$, $\ODE\to\OL$ and the standard Friedmann equation is recovered.
+
+\emph{Late-time effective form.} Expanding $\ODE(z)$ about the de~Sitter attractor $y\to1$ gives $E^2(z)\simeq\OL+\cos^2\!\theta\,\Om(1+z)^3+\Orad(1+z)^4$, the dark-degeneracy form noted by \citet{Hogas2021}. Over the BAO/SNe window $z\le2.33$ its maximum relative residual in $E^2$ is $3.4\times10^{-5}$. This work quantifies the controlled departure from that limit rather than claiming a new degeneracy.
+
+\subsection[Quartic equation for y(z)]{Quartic equation for $y(z)$}
+The scale-factor ratio $y(z)=a_f/a_g$ satisfies a quartic equation \citep[][Eq.~5.5, equivalent to the appendix of \citealp{Hogas2025}]{Hogas2021}, solved numerically by Brent's method on the branch containing the physical solution. For the benchmark we follow the continuous positive finite branch with $y(0)\simeq1$, $y\to1$ on the future de~Sitter attractor ($z\to-1$) and $y\to0$ as $z\to\infty$, consistently with \citet[][Sec.~5.2]{Hogas2021}; in the solver it is selected as the smallest positive real root of the quartic. These limits are distinct from the strict GR limit $\theta\to0$. The infinite branch is excluded because of the Higuchi ghost. The solution is checked against the closure condition $E^2(0)=1$ with a residual below $10^{-12}$. The solver raises an exception when no root exists on the branch; there is no silent fallback.
+
+\subsection[Self-consistent Omega m]{Self-consistent $\Om$}\label{sec:Om}
+For fixed interaction parameters and a specified radiation convention, the quartic closure $E^2(0)=1$ determines $\Om$ once $\OL$ and $\theta$ are specified. At the benchmark $\Om=0.30439$ with the BAO photons-only radiation convention and $0.30435$ with the SNe/scalar $N_{\rm eff}$ convention. The CMB closure gives $0.30303$ at the fitted $h$ (the CMB convention excludes the massive neutrinos from $\Om$, adds $\omega_\nu/h^2$ as a separate term, and uses $\Orad(h)=\omega_r/h^2$ rather than a fixed fraction).
+Because $\OL$ is an input, the $z=0$ prediction is rigid by construction; the non-trivial content of the model is the shape of $E^2(z)$ away from $z=0$ and the rigidity of the prediction under $(\alpha,\beta)$ (\cref{tab:A1b}). The fractional bimetric correction to $E^2(z)$ is negative at all $z>0$, reaching a maximum magnitude of $1.11\%$ near $z=5$ (\cref{fig:background}, \cref{tab:A2}).
+
+\subsection{B-parameters}
+The B-parameter formalism \citep[][Eq.~3.4]{Hogas2021} re-expresses the interaction parameters. At the benchmark $B_0=-40.248$, $B_1=28.230$, $B_2=-21.173$, $B_3=21.173$, $B_4=-28.206$ ($B_1^2=796.94$; \cref{tab:A1}). The forward--inverse (round-trip) recovery of $(\mFP^2,\OL,\alpha,\beta)$ agrees to better than $10^{-10}$, confirming the internal consistency of the pipeline.
+
+\subsection{Effective equation of state}
+The effective dark-energy equation of state, defined through $w_{\rm DE}=-1+\frac{1+z}{3\ODE}\frac{\dd\ODE}{\dd z}$, is phantom, $w_{\rm DE}(z)<-1$, on the positive-$\ODE$ branch up to the zero crossing, with $w_{\rm DE}(0)=-1.005$ (\cref{tab:A3}). $\ODE(z)$ crosses zero at $z_0=4.882$ and tends to the negative asymptote $\OL-\sin^2\!\theta\,\mFP^2(1+\alpha+\beta/3)=-13.42$ at the benchmark. $w_{\rm DE}$ diverges at the zero crossing; beyond it $\ODE<0$, so the conventional dark-energy interpretation is no longer appropriate, although the ratio remains defined wherever $\ODE\neq0$. Within this definition the phantom behaviour on the positive-density branch is a robust feature of the benchmark expansion history, arising from the $y$-dependence of $\ODE$ (\cref{fig:background}).
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{fig1_background}
+\caption{Benchmark expansion history ($\theta=6.1\deg$, $\mFP/H_0=25$, $\alpha=0$, $\beta=3$, $\OL=0.699$). (a)~Scale-factor ratio $y(z)$. (b)~Effective dark-energy density $\ODE(z)$: it crosses zero at $z_0=4.882$ and tends to $-13.42$. (c)~Fractional difference $\delta E^2$ of $E^2_{\rm bim}$ from \LCDM{} with the same $\Om$ and $\Orad$; the maximum magnitude is $1.11\%$ near $z=5$. (d)~Effective equation of state, phantom ($w_{\rm DE}<-1$, shaded) with a pole at $z_0$. Vertical dashed/dotted lines mark the Vainshtein boundary $z_V$ ($H(z_V)=\mFP$) and $z_0$ (both defined in \cref{sec:Xz}). Generated by \code{src/make\_figures.py}.}\label{fig:background}
+\end{figure}
+
+\subsection{Chi-squared calculation and benchmark conventions}\label{sec:chi2}
+For each probe, $\chi^2=(\mathbf d-\mathbf m)^{\!\top}C^{-1}(\mathbf d-\mathbf m)$, minimised over the relevant free parameters. The resulting per-probe quantities are profile-likelihood diagnostics: they are not integrated marginal posteriors and do not by themselves define evidence or a Bayes factor.
+For BAO the scale $f=c/(H_0r_d)$ is profiled; for SNe the absolute magnitude $M$ is profiled analytically (and $\Om$ for \LCDM{}; the bimetric $\Om$ is fixed by the quartic closure); for the CMB, $h$ and $\omega_b$ are fitted against a free three-parameter flat-\LCDM{} reference. The bimetric potential parameters are held at the benchmark of \cref{sec:intro} ($\theta=6.1\deg$, $\mFP/H_0=25$, $\alpha=0$, $\beta=3$) with $\OL=0.699$ unless stated otherwise.
+The radiation density follows the fiducial treatment of each dataset ($\Orad=5.38\times10^{-5}$, photons only, for BAO; $9.08\times10^{-5}$ with $N_{\rm eff}=3.046$ for SNe; for the CMB $\Orad(h)=\omega_r/h^2$ with $\omega_r=4.17\times10^{-5}$, photons only below the neutrino join). The effect of this choice on the BAO $\Dchi$ is $0.014$ at the benchmark ($0.1935$ with $N_{\rm eff}=3.046$ against $0.1792$ photons only) and below $0.01$ for SNe; every BAO number below uses the photons-only fiducial. The conventions are collected in \cref{tab:conv}.
+
+\begin{table}[t]
+\centering\small
+\caption{Benchmark conventions used throughout.}\label{tab:conv}
+\begin{tabularx}{\textwidth}{@{}l l l X@{}}
+\toprule
+Quantity & Value & Applies to & Note\\
+\midrule
+$\Orad$ & $5.38\times10^{-5}$ & BAO & photons only (DESI DR2)\\
+$\Orad$ & $9.08\times10^{-5}$ & SNe, scalar & fixed fraction; $=\omega_r/h^2$ at $h=0.678$, $\omega_r=4.17\times10^{-5}$\\
+$\Orad$ & $\omega_r/h^2$ & CMB & $h$-dependent; photons only below the neutrino join, $+N_{\rm eff}$ above\\
+$\Om$ (closure) & $0.30439$ & BAO & self-consistent $z=0$ (photons only)\\
+$\Om$ (closure) & $0.30435$ & SNe, scalar & self-consistent $z=0$ ($N_{\rm eff}=3.046$)\\
+$\Om$ (closure) & $0.30303$ & CMB & neutrinos \emph{excluded} from the closure and added as $\omega_\nu/h^2$; at the fitted $h$ (\cref{tab:A5})\\
+$\Om$ (CMB ref.) & $0.3029$ & \cref{tab:A1b} & at reference $h=0.678$\\
+$\Omega(0)$ & $0.3044455$ & \cref{app:pseudo} & $\Om+\Orad$ (full-precision BAO closure $0.30439172$)\\
+$z_{\rm rec}$ & Hu--Sugiyama & CMB & fitted $(\omega_b,\omega_m)$\\
+$\OL$ & $0.699$ & all & anchor (profiled in \cref{sec:anchor})\\
+\bottomrule
+\end{tabularx}
+\end{table}
