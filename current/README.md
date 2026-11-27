@@ -9,7 +9,7 @@ This directory contains the current laboratory candidate of the per-probe bimetr
 - `PRERELEASE_README.md` — package contents and verification summary.
 - `src/` — current Python implementation.
 - `results/` — declared current results used by the assertions and figures.
-- `data/` — small public inputs and the reviewed curated Pantheon+ table; the official covariance is downloaded by `data/download_data.sh`.
+- `data/` — small public DESI inputs and `download_data.sh`, which retrieves the official Pantheon+ table and pins the reviewed covariance by SHA-256.
 - `01_Statya/` — article source; figures are regenerated from declared results by CI.
 - `package_release.py` — builds the PDF, arXiv source, source/data package, checksums and full research-preview ZIP.
 

@@ -1,0 +1,17 @@
+old_path	new_path	github_blob_sha	size_bytes	pair_or_scope
+BAO_Blindness_v21.5.md	archive/v21.5/BAO_Blindness_v21.5.md	2b9b34f3cfd5eceff7a80165ef951a298f0aebcb	63319	article v21.x ↔ code v10.6
+BAO_Blindness_v21.6.md	archive/v21.6/BAO_Blindness_v21.6.md	42d506901905b553c02c1d27b9d71f5f184f6d64	66559	article v21.x ↔ code v10.6
+BAO_Blindness_v28.0_public_draft.md	archive/v28.0/BAO_Blindness_v28.0_public_draft.md	a3de49d4c0ca676e9ee2274f2a9497dd83ddd5e6	92558	article v28.0/v28.0.1 ↔ documentary code v13.3
+BAO_Blindness_v28.0_public_draft.pdf	archive/v28.0/BAO_Blindness_v28.0_public_draft.pdf	9b9970ecd9c2a011d4be9bea71a6560e1ac1be69	390449	article v28.0/v28.0.1 ↔ documentary code v13.3
+BAO_Blindness_v28.0_public_draft_release.zip	archive/v28.0/BAO_Blindness_v28.0_public_draft_release.zip	78f3fea0a7d24c24ffab2f5bca3596f4de154868	822961	article v28.0/v28.0.1 ↔ documentary code v13.3
+Bimetric_Code_Archive_v10.6.txt	archive/v10.6/Bimetric_Code_Archive_v10.6.txt	89eec87bcb07f3d93dc5f3a277d60ca65b2147b9	99585	code v10.6 ↔ articles v21.5/v21.6
+Bimetric_Code_Archive_v13.3.txt	archive/v13.3/Bimetric_Code_Archive_v13.3.txt	33ef2f0b2c6cfc4f72d6d44a04ebb8aac4aa42c3	459947	code v13.3 ↔ article v28.0
+Dnevnik_Alicy_2026-10-10_rev55.md	archive/internal_logs/Dnevnik_Alicy_2026-10-10_rev55.md	3fe92ba75e8cb64ee081ed9c0540c2f8181116b5	38361	historical figure or internal log; not current public entry point
+Dnevnik_Alicy_2026-10-10_rev59.md	archive/internal_logs/Dnevnik_Alicy_2026-10-10_rev59.md	e70545880d809f844bdc6ce86d058054815c60a4	44063	historical figure or internal log; not current public entry point
+Fig3_theta_scan.png	archive/figures/Fig3_theta_scan.png	2a17becc48d9d714d0789c6a75e413f2526aae68	100820	historical figure or internal log; not current public entry point
+FigD1_SNe_reference_sensitivity.png	archive/figures/FigD1_SNe_reference_sensitivity.png	4fb96444f78329b1db39bac1b594a48da9c05a47	102798	historical figure or internal log; not current public entry point
+RELEASE_MANIFEST_v28.0.txt	archive/v28.0/RELEASE_MANIFEST_v28.0.txt	2c0c7d50aee25e73a4eba449bae3ba431899c442	4756	article v28.0/v28.0.1 ↔ documentary code v13.3
+RELEASE_NOTES_v28.0.1.md	archive/v28.0/RELEASE_NOTES_v28.0.1.md	0b1a2b63f6808cb94d24e2c6dac2b476bb3bafe7	1256	article v28.0/v28.0.1 ↔ documentary code v13.3
+RELEASE_NOTES_v28.0.md	archive/v28.0/RELEASE_NOTES_v28.0.md	19c24790bd2335f4c0ab3de06fc2bfb08dea57c4	1530	article v28.0/v28.0.1 ↔ documentary code v13.3
+Rabochiy_zhurnal_2026-10-10_rev55.md	archive/internal_logs/Rabochiy_zhurnal_2026-10-10_rev55.md	2ee0e0f23819b7fa372295b13acbb393ea40a852	86058	historical figure or internal log; not current public entry point
+Rabochiy_zhurnal_2026-10-10_rev59.md	archive/internal_logs/Rabochiy_zhurnal_2026-10-10_rev59.md	891ba4ffb5f993ffadb7ef7091140404e40b84fc	94763	historical figure or internal log; not current public entry point
