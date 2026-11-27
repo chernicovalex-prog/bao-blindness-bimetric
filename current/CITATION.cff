@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+message: "Cite the research-preview version actually used; use the version-specific DOI displayed by Zenodo when available."
+title: "The H&M Anchor, Decomposed: A Per-Probe Analysis of the Bimetric Cosmological Benchmark"
+authors:
+  - family-names: Chernikov
+    given-names: Aleksandr
+version: r28-review-candidate
+date-released: 2026-11-27
+repository-code: "https://github.com/chernicovalex-prog/bao-blindness-bimetric"
+license: MIT
+preferred-citation:
+  type: article
+  title: "The H&M Anchor, Decomposed: A Per-Probe Analysis of the Bimetric Cosmological Benchmark"
+  authors:
+    - family-names: Chernikov
+      given-names: Aleksandr
+  year: 2026
+  date-published: 2026-11-27
+  version: "r28 research preview"
+  url: "https://github.com/chernicovalex-prog/bao-blindness-bimetric"
+  notes: "Research preview, not peer reviewed. The concept DOI 10.5281/zenodo.23292159 belongs to the existing record family; use the version-specific DOI displayed by Zenodo after the new version is published."
