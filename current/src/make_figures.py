@@ -89,7 +89,7 @@ def fig1_background():
     a, b, c, d = ax.ravel()
     for axx in (a, b, c):
         axx.axvline(zV, color=GREY, lw=0.9, ls=(0, (4, 3)))
-        axx.axvline(z0, color=INK2, lw=0.9, ls=(0, (1, 2)))
+        axx.axvline(z0, color=GREY, lw=0.9, ls=(0, (1, 2)))
     # (a) y(z)
     a.plot(zz, y, color=BLUE)
     a.set_xlabel(r"redshift $z$"); a.set_ylabel(r"$y(z)=a_f/a_g$")
